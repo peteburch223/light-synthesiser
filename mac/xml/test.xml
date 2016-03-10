@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<parameters>
+  <calibration>
+    <red a="1" H="10"/>
+    <green a="2" H="20"/>
+    <blue a="3" H="30"/>
+  </calibration>
+  <colours>
+    <colour>
+      <red hue="1" saturation="10" brightness="100"/>
+      <green hue="2" saturation="20" brightness="200"/>
+      <blue hue="3" saturation="30" brightness="300"/>
+    </colour>
+    <colour>
+      <red hue="4" saturation="40" brightness="400"/>
+      <green hue="5" saturation="50" brightness="500"/>
+      <blue hue="6" saturation="60" brightness="600"/>
+    </colour>
+  </colours>
+</parameters>
