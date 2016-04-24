@@ -5,4 +5,6 @@ ruby '2.3.0'
 group :test, :development do
   gem 'rspec'
   gem 'nokogiri'
+  gem 'serialport'
+  gem 'dino'
 end

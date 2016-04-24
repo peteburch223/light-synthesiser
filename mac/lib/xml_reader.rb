@@ -12,29 +12,24 @@ class XmlReader
     @doc = @file_instance.open(file) { |f| Nokogiri::XML(f) }
   end
 
-  def extract_parameters
-    @parameters ={}
-    @doc.xpath('/parameters/calibration/*').each do |element|
-      temp = {}
-      element.attributes.each {|k, v| temp[k.to_sym] = v.value.to_i}
-      @parameters[element.name.to_sym] = temp
+  def settings
+    @doc.xpath("/parameters/settings/*").reduce({}) do |result, element|
+      result.merge(element.name.to_sym => extract(element.attributes))
     end
-    @parameters
   end
 
-  def extract_colours
-    @colours = []
-    @doc.xpath('/parameters/colours/*').each do |colour|
-      component = {}
-      colour.children.each do |comp|
-        if comp.is_a?Nokogiri::XML::Element
-          temp = {}
-          comp.attributes.each{|k,v| temp[k.to_sym] = v.value.to_i}
-          component[comp.name.to_sym] = temp
-        end
-      end
-      @colours << component
+  def colours
+    @doc.xpath("/parameters/colours/*").map do |element|
+      extract(element.attributes)
     end
-    @colours
+  end
+
+  private
+
+  def extract(attributes)
+    attributes.reduce({}) do |result, (k,v)| # |k, v|
+      result.merge(k.to_sym => v.value.to_f)
+    end
+
   end
 end
