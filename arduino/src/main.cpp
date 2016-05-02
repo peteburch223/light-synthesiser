@@ -6,14 +6,16 @@ const byte ledRPin = 2;
 const byte ledGPin = 3;
 const byte ledBPin = 4;
 
+const byte LED_ON_MASK_BASE = 0x04;
+const byte LED_OFF_MASK = 0xE3;
+
+
 const byte ledOnBoardPin = 13;
 const byte selPin0 = 14;
 const byte selPin1 = 15;
 const byte selPin2 = 16;
 const byte selPin3 = 17;
 const byte startPin = 18;
-
-const byte SHUTTER = 9;  // this is OC1A (timer 1 output compare A)
 
 // function declarations
 void setup_io(void);
@@ -24,19 +26,30 @@ void serial_echo(void);
 void serial_echo_line(void);
 void readback_array(int);
 void light_timer(long int duration, int pin);
-void one_shot(int duration);
+void one_shot();
+void led_sequence();
+void check_for_trigger();
 
+void initialize_globals();
+void initialize_value_array();
+
+
+int go_previous_state;
 int go_current_state;
 int channel_current_state;
 
 int go_debounce_counter;
 int channel_debounce_counter;
 
+int selected_channel;
+
 int value_array[16][3];
-// boolean led_state = false;
+
 
 boolean data_received;
-boolean triggered;
+boolean sequence_triggered;
+boolean timer_running;
+byte colour_pointer;
 
 
 
@@ -46,52 +59,33 @@ void setup()
 {
   Serial.begin(115200);
   setup_io();
-  go_current_state = debounce(HIGH, 0, &go_debounce_counter, 1);
-  channel_current_state = debounce(0, 0, &channel_debounce_counter, 1);
-  data_received = false;
-  triggered = false;
+  initialize_value_array();
+  initialize_globals();
 }
 
 ISR(TIMER1_COMPA_vect)
 {
-   TCCR1A = 0;        // reset timer 1
-   TCCR1B = 0;
-   digitalWrite(ledRPin, LOW);
-   triggered = false;
-   Serial.println("Pulse Ended");
-
+  PORTD &= LED_OFF_MASK;    // clear all LED pins
+  TCCR1A = 0;               // reset timer 1
+  TCCR1B = 0;
+  timer_running = false;
+  colour_pointer += 1;      // increment colour pointer
 }
 
 void loop()
 {
-  int go_previous_state = go_current_state;
+  go_previous_state = go_current_state;
   channel_current_state = debounce(channel_current_state, read_selector(),&channel_debounce_counter, 0);
   go_current_state = debounce(go_current_state, digitalRead(startPin), &go_debounce_counter, 0);
 
 
-  if (go_current_state != go_previous_state) {
-    // led_state = !led_state;
-    if(go_current_state == LOW && !triggered){
-      triggered = true;
+  check_for_trigger();
+  led_sequence();
 
-      Serial.print("Triggered channel ");
-      Serial.println(channel_current_state, HEX);
-
-
-      one_shot(65535);
-
-      // light_timer(200,ledRPin);
-      // light_timer(300,ledGPin);
-      // light_timer(100,ledBPin);
-
-      // write_to_leds(channel_current_state);
-    }
+  serial_echo_line();
+  if(data_received){
+    readback_array(channel_current_state);
   }
-
-  // serial_echo_line();
-  // if(data_received){
-  //   readback_array(channel_current_state);
-  // }
 }
 
 int read_selector(void){
@@ -102,21 +96,54 @@ int read_selector(void){
   return 0xF - selector_value;
 }
 
-void write_to_leds(int value) {
-  digitalWrite(ledRPin, (value & 1));
-  digitalWrite(ledGPin, (value & 2));
-  digitalWrite(ledBPin, (value & 4));
+void check_for_trigger(){
+
+  if (go_current_state != go_previous_state) {
+    if(go_current_state == LOW && !sequence_triggered){
+      sequence_triggered = true;
+      selected_channel = channel_current_state;
+      colour_pointer = 0;
+
+      Serial.print("sequence_triggered channel ");
+      Serial.println(channel_current_state, HEX);
+    }
+  }
 }
 
 
 
-void one_shot(int duration) {
+void led_sequence(){
+
+  if (sequence_triggered && !timer_running){
+    if (colour_pointer < 3){
+      Serial.print("Colour ");
+      Serial.println(colour_pointer, HEX);
+      Serial.print("Duration ");
+      Serial.println(value_array[selected_channel][colour_pointer], HEX);
+
+      one_shot();
+    } else {
+      sequence_triggered = false;
+      colour_pointer = 0;
+      Serial.println("Sequence completed");
+
+    }
+  }
+}
+
+
+
+void one_shot() {
   // delay (250);   // debugging
+
+  int duration = value_array[selected_channel][colour_pointer];
+  int led_mask = LED_ON_MASK_BASE << colour_pointer;
 
   TCCR1A = 0;        // reset timer 1
   TCCR1B = 0;
 
-  digitalWrite(ledRPin, HIGH);;   // ready to activate
+  timer_running = true;
+  PORTD |= led_mask;
 
   // set up Timer 1
   TCNT1 = 0;         // reset counter
@@ -127,20 +154,6 @@ void one_shot(int duration) {
 
   TIFR1 |= bit (OCF1A);    // clear interrupt flag
   TIMSK1 = bit (OCIE1A);   // interrupt on Compare A Match
-}
-
-
-void light_timer(long int duration, int pin) {
-  // noInterrupts();
-  digitalWrite(pin, HIGH);
-
-  while(duration > 0){
-    // Serial.println(duration,HEX);
-    delay(5);
-    duration--;
-  }
-  digitalWrite(pin, LOW);
-  // interrupts();
 }
 
 int debounce(int current_state, int reading, int *counter, int initialize) {
@@ -234,11 +247,51 @@ void setup_io() {
   pinMode(ledGPin, OUTPUT);
   pinMode(ledBPin, OUTPUT);
   pinMode(ledOnBoardPin, OUTPUT);
-  pinMode (SHUTTER, OUTPUT);
 
   digitalWrite(ledRPin, LOW);
   digitalWrite(ledGPin, LOW);
   digitalWrite(ledBPin, LOW);
   digitalWrite(ledOnBoardPin, LOW);
-  digitalWrite (SHUTTER, LOW);
+}
+
+void initialize_globals(){
+  go_current_state = debounce(HIGH, 0, &go_debounce_counter, 1);
+  channel_current_state = debounce(0, 0, &channel_debounce_counter, 1);
+  data_received = false;
+  sequence_triggered = false;
+  timer_running = false;
+  colour_pointer = 0;
+}
+
+
+void initialize_value_array() {
+  for(int i=0; i<16; i++){
+    for(int j=0; j<3; j++){
+      int channel = i;
+      int colour = j << 4;
+      value_array[i][j] = 0xFFFFFF00 | colour | channel;
+    }
+  }
+}
+
+
+// UNUSED FUNCTIONS
+
+void write_to_leds(int value) {
+  digitalWrite(ledRPin, (value & 1));
+  digitalWrite(ledGPin, (value & 2));
+  digitalWrite(ledBPin, (value & 4));
+}
+
+void light_timer(long int duration, int pin) {
+  // noInterrupts();
+  digitalWrite(pin, HIGH);
+
+  while(duration > 0){
+    // Serial.println(duration,HEX);
+    delay(5);
+    duration--;
+  }
+  digitalWrite(pin, LOW);
+  // interrupts();
 }
