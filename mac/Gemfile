@@ -7,4 +7,5 @@ group :test, :development do
   gem 'nokogiri'
   gem 'serialport'
   gem 'dino'
+  gem 'byebug'
 end
