@@ -2,12 +2,21 @@
 #include "Arduino.h"
 #include <TimerHelpers.h>
 
-const byte ledRPin = 2;
-const byte ledGPin = 3;
-const byte ledBPin = 4;
+// const byte ledRPin = 2;
+// const byte ledGPin = 3;
+// const byte ledBPin = 4;
+// const byte LED_ON_MASK_BASE = 0x04;
+// const byte LED_OFF_MASK = 0xE3;
 
-const byte LED_ON_MASK_BASE = 0x04;
-const byte LED_OFF_MASK = 0xE3;
+const int VALUE_ARRAY_SIZE = 16;
+
+const byte ledRPin = 5;
+const byte ledGPin = 6;
+const byte ledBPin = 7;
+const byte LED_ON_MASK_BASE = 0x20;
+const byte LED_OFF_MASK = 0x1F;
+
+const byte TIMER0_CLOCK_PIN = 9;
 
 
 const byte ledOnBoardPin = 13;
@@ -15,18 +24,20 @@ const byte selPin0 = 14;
 const byte selPin1 = 15;
 const byte selPin2 = 16;
 const byte selPin3 = 17;
-const byte startPin = 18;
+const byte startPin = 19;
 
 // function declarations
 void setup_io(void);
 int read_selector(void);
-void write_to_leds(int value);
+// void write_to_leds(int value);
 int debounce(int current_state, int pin_value, int *counter, int initialize);
-void serial_echo(void);
+// void serial_echo(void);
 void serial_echo_line(void);
 void readback_array(int);
-void light_timer(long int duration, int pin);
-void one_shot();
+// void light_timer(long int duration, int pin);
+void timer_1_one_shot();
+void timer_0_one_shot();
+void timer_1_free_run();
 void led_sequence();
 void check_for_trigger();
 
@@ -43,7 +54,7 @@ int channel_debounce_counter;
 
 int selected_channel;
 
-int value_array[16][3];
+int value_array[VALUE_ARRAY_SIZE][3];
 
 
 boolean data_received;
@@ -61,13 +72,25 @@ void setup()
   setup_io();
   initialize_value_array();
   initialize_globals();
+  timer_1_free_run();
 }
 
 ISR(TIMER1_COMPA_vect)
 {
+  // PORTD &= LED_OFF_MASK;    // clear all LED pins
+  // TCCR1A = 0;               // reset timer 1
+  // TCCR1B = 0;
+  // timer_running = false;
+  // colour_pointer += 1;      // increment colour pointer
+
+Serial.println("T1 interrupt");
+}
+
+ISR(TIMER0_COMPA_vect)
+{
   PORTD &= LED_OFF_MASK;    // clear all LED pins
-  TCCR1A = 0;               // reset timer 1
-  TCCR1B = 0;
+  TCCR0A = 0;               // reset timer 1
+  TCCR0B = 0;
   timer_running = false;
   colour_pointer += 1;      // increment colour pointer
 }
@@ -121,7 +144,8 @@ void led_sequence(){
       Serial.print("Duration ");
       Serial.println(value_array[selected_channel][colour_pointer], HEX);
 
-      one_shot();
+      timer_0_one_shot();
+      // one_shot();
     } else {
       sequence_triggered = false;
       colour_pointer = 0;
@@ -131,9 +155,23 @@ void led_sequence(){
   }
 }
 
+void timer_1_free_run(){
+
+  TCCR1A = 0;        // reset timer 1
+  TCCR1B = 0;
+
+  // set up Timer 1
+  OCR1A = 0x3FF;
+  TCNT1 = 0;         // reset counter
+
+  // Mode 4: CTC, top = OCR1A
+  // Toggle Pin 9
+  Timer1::setMode (4, Timer1::PRESCALE_1024, Timer1::TOGGLE_A_ON_COMPARE);
+}
 
 
-void one_shot() {
+
+void timer_1_one_shot() {
   // delay (250);   // debugging
 
   int duration = value_array[selected_channel][colour_pointer];
@@ -155,6 +193,35 @@ void one_shot() {
   TIFR1 |= bit (OCF1A);    // clear interrupt flag
   TIMSK1 = bit (OCIE1A);   // interrupt on Compare A Match
 }
+
+
+
+void timer_0_one_shot() {
+  // delay (250);   // debugging
+
+  int duration = 0xFF;
+  int led_mask = LED_ON_MASK_BASE << colour_pointer;
+
+  TCCR1A = 0;        // reset timer 1
+  TCCR1B = 0;
+
+  timer_running = true;
+  PORTD |= led_mask;
+
+  // set up Timer 1
+  TCNT0 = 0;         // reset counter
+  OCR1A =  duration;       // compare A register value (1000 * clock speed)
+
+  // Mode 2: CTC, top = OCR0A
+  // *** NEED TO FIGURE OUT HOW TO CONFIGURE FOR EXTERNAL CLOCK ON PIN D4
+  Timer0::setMode (2, Timer0::PRESCALE_1024, Timer0::NO_PORT);
+
+  TIFR0 |= bit (OCF0A);    // clear interrupt flag
+  TIMSK0 = bit (OCIE0A);   // interrupt on Compare A Match
+}
+
+
+
 
 int debounce(int current_state, int reading, int *counter, int initialize) {
   int DEBOUNCE_COUNT = 10;
@@ -201,35 +268,36 @@ void serial_echo_line(void){
 
   if (Serial.available()) {
 
-      if (Serial.peek() == 'z'){
-        Serial.readStringUntil('\n');
-        Serial.print("START OF BLOCK");
+    if (Serial.peek() == 'z'){
+      Serial.readStringUntil('\n');
+      Serial.print("START OF BLOCK");
+      Serial.print('\n');
+      arrayPointer = 0;
+
+    } else if (Serial.peek() == 'x') {
+      Serial.readStringUntil('\n');
+      Serial.print("END OF BLOCK");
+      Serial.print('\n');
+      data_received = true;
+
+    } else {
+      int red = Serial.parseInt();
+      int green = Serial.parseInt();
+      int blue = Serial.parseInt();
+      if (Serial.read() == '\n') {
+        value_array[arrayPointer][0] = red;
+        value_array[arrayPointer][1] = green;
+        value_array[arrayPointer][2] = blue;
+
+        Serial.print(red, HEX);
+        Serial.print(green, HEX);
+        Serial.print(blue,HEX);
+        Serial.print("OK");
         Serial.print('\n');
-        arrayPointer = 0;
 
-      } else if (Serial.peek() == 'x') {
-        Serial.readStringUntil('\n');
-        Serial.print("END OF BLOCK");
-        Serial.print('\n');
-        data_received = true;
-
-      } else {
-        int red = Serial.parseInt();
-        int green = Serial.parseInt();
-        int blue = Serial.parseInt();
-        if (Serial.read() == '\n') {
-          value_array[arrayPointer][0] = red;
-          value_array[arrayPointer][1] = green;
-          value_array[arrayPointer][2] = blue;
-
-          Serial.print(red, HEX);
-          Serial.print(green, HEX);
-          Serial.print(blue,HEX);
-          Serial.print("OK");
-          Serial.print('\n');
-
+        if (arrayPointer < VALUE_ARRAY_SIZE){
           arrayPointer += 1;
-
+        }
       }
     }
   }
@@ -246,12 +314,15 @@ void setup_io() {
   pinMode(ledRPin, OUTPUT);
   pinMode(ledGPin, OUTPUT);
   pinMode(ledBPin, OUTPUT);
+  pinMode(TIMER0_CLOCK_PIN, OUTPUT);
+
   pinMode(ledOnBoardPin, OUTPUT);
 
   digitalWrite(ledRPin, LOW);
   digitalWrite(ledGPin, LOW);
   digitalWrite(ledBPin, LOW);
   digitalWrite(ledOnBoardPin, LOW);
+  digitalWrite(TIMER0_CLOCK_PIN, LOW);
 }
 
 void initialize_globals(){
