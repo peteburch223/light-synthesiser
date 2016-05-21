@@ -6,33 +6,27 @@ const int VALUE_ARRAY_SIZE = 16;
 const int WAIT_COUNT = 0x7F;
 
 
-const byte gatePin = 3;
-const byte ledRPin = 5;
-const byte ledGPin = 6;
-const byte ledBPin = 7;
+const byte GATE_PIN = 3;
+const byte RED_PIN = 5;
+const byte GREEN_PIN = 6;
+const byte BLUE_PIN = 7;
 const byte LED_ON_MASK_BASE = 0x20;
 const byte LED_OFF_MASK = 0x1F;
 
 const byte TIMER0_CLOCK_PIN = 9;
 
-
-const byte ledOnBoardPin = 13;
-const byte selPin0 = 14;
-const byte selPin1 = 15;
-const byte selPin2 = 16;
-const byte selPin3 = 17;
-const byte startPin = 19;
+const byte SEL_PIN_0 = 14;
+const byte SEL_PIN_1 = 15;
+const byte SEL_PIN_2 = 16;
+const byte SEL_PIN_3 = 17;
+const byte START_PIN = 19;
 
 // function declarations
 void setup_io(void);
 int read_selector(void);
-// void write_to_leds(int value);
 int debounce(int current_state, int pin_value, int *counter, int initialize);
-// void serial_echo(void);
 void serial_echo_line(void);
 void readback_array(int);
-// void light_timer(long int duration, int pin);
-// void timer_1_one_shot();
 void timer_0_one_shot(int duration);
 void timer_1_free_run();
 void led_sequence();
@@ -94,7 +88,7 @@ void loop()
 {
   go_previous_state = go_current_state;
   channel_current_state = debounce(channel_current_state, read_selector(),&channel_debounce_counter, 0);
-  go_current_state = debounce(go_current_state, digitalRead(startPin), &go_debounce_counter, 0);
+  go_current_state = debounce(go_current_state, digitalRead(START_PIN), &go_debounce_counter, 0);
 
 
   check_for_trigger();
@@ -108,10 +102,10 @@ void loop()
 }
 
 int read_selector(void){
-  int selector_value = digitalRead(selPin0) * 1 +
-                      digitalRead(selPin1) * 2 +
-                      digitalRead(selPin2) * 4 +
-                      digitalRead(selPin3) * 8;
+  int selector_value = digitalRead(SEL_PIN_0) * 1 +
+                      digitalRead(SEL_PIN_1) * 2 +
+                      digitalRead(SEL_PIN_2) * 4 +
+                      digitalRead(SEL_PIN_3) * 8;
   return 0xF - selector_value;
 }
 
@@ -119,7 +113,7 @@ void check_for_trigger(){
 
   if (go_current_state != go_previous_state) {
     if(go_current_state == LOW && !sequence_triggered){
-      digitalWrite(gatePin, HIGH);
+      digitalWrite(GATE_PIN, HIGH);
 
       sequence_triggered = true;
       start_wait = true;
@@ -131,8 +125,6 @@ void check_for_trigger(){
     }
   }
 }
-
-
 
 void led_sequence(){
 
@@ -148,7 +140,7 @@ void led_sequence(){
 
     } else {
       sequence_triggered = false;
-      digitalWrite(gatePin, LOW);
+      digitalWrite(GATE_PIN, LOW);
 
       wait = false;
       colour_pointer = 0;
@@ -174,9 +166,6 @@ void timer_1_free_run(){
   TCNT1 = 0;         // reset counter
   Timer1::setMode (4, Timer1::PRESCALE_64, Timer1::TOGGLE_A_ON_COMPARE);
 }
-
-
-
 
 void timer_0_one_shot(int duration) {
 
@@ -313,25 +302,22 @@ void serial_echo_line(void){
 
 
 void setup_io() {
-  pinMode(selPin0, INPUT);
-  pinMode(selPin1, INPUT);
-  pinMode(selPin2, INPUT);
-  pinMode(selPin3, INPUT);
-  pinMode(startPin, INPUT);
+  pinMode(SEL_PIN_0, INPUT);
+  pinMode(SEL_PIN_1, INPUT);
+  pinMode(SEL_PIN_2, INPUT);
+  pinMode(SEL_PIN_3, INPUT);
+  pinMode(START_PIN, INPUT);
 
-  pinMode(gatePin, OUTPUT);
-  pinMode(ledRPin, OUTPUT);
-  pinMode(ledGPin, OUTPUT);
-  pinMode(ledBPin, OUTPUT);
+  pinMode(GATE_PIN, OUTPUT);
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(BLUE_PIN, OUTPUT);
   pinMode(TIMER0_CLOCK_PIN, OUTPUT);
 
-  pinMode(ledOnBoardPin, OUTPUT);
-
-  digitalWrite(gatePin, LOW);
-  digitalWrite(ledRPin, LOW);
-  digitalWrite(ledGPin, LOW);
-  digitalWrite(ledBPin, LOW);
-  digitalWrite(ledOnBoardPin, LOW);
+  digitalWrite(GATE_PIN, LOW);
+  digitalWrite(RED_PIN, LOW);
+  digitalWrite(GREEN_PIN, LOW);
+  digitalWrite(BLUE_PIN, LOW);
   digitalWrite(TIMER0_CLOCK_PIN, LOW);
 }
 
