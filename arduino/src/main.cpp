@@ -75,21 +75,10 @@ void setup()
   timer_1_free_run();
 }
 
-ISR(TIMER1_COMPA_vect)
-{
-  // PORTD &= LED_OFF_MASK;    // clear all LED pins
-  // TCCR1A = 0;               // reset timer 1
-  // TCCR1B = 0;
-  // timer_running = false;
-  // colour_pointer += 1;      // increment colour pointer
-
-Serial.println("T1 interrupt");
-}
-
 ISR(TIMER0_COMPA_vect)
 {
   PORTD &= LED_OFF_MASK;    // clear all LED pins
-  TCCR0A = 0;               // reset timer 1
+  TCCR0A = 0;               // reset timer 0
   TCCR0B = 0;
   timer_running = false;
   colour_pointer += 1;      // increment colour pointer
@@ -161,38 +150,14 @@ void timer_1_free_run(){
   TCCR1B = 0;
 
   // set up Timer 1
-  OCR1A = 0x3FF;
+  OCR1A = 0xF;
   TCNT1 = 0;         // reset counter
 
   // Mode 4: CTC, top = OCR1A
   // Toggle Pin 9
-  Timer1::setMode (4, Timer1::PRESCALE_1024, Timer1::TOGGLE_A_ON_COMPARE);
+  Timer1::setMode (4, Timer1::PRESCALE_1, Timer1::TOGGLE_A_ON_COMPARE);
 }
 
-
-
-void timer_1_one_shot() {
-  // delay (250);   // debugging
-
-  int duration = value_array[selected_channel][colour_pointer];
-  int led_mask = LED_ON_MASK_BASE << colour_pointer;
-
-  TCCR1A = 0;        // reset timer 1
-  TCCR1B = 0;
-
-  timer_running = true;
-  PORTD |= led_mask;
-
-  // set up Timer 1
-  TCNT1 = 0;         // reset counter
-  OCR1A =  duration;       // compare A register value (1000 * clock speed)
-
-  // Mode 4: CTC, top = OCR1A
-  Timer1::setMode (4, Timer1::PRESCALE_1024, Timer1::NO_PORT);
-
-  TIFR1 |= bit (OCF1A);    // clear interrupt flag
-  TIMSK1 = bit (OCIE1A);   // interrupt on Compare A Match
-}
 
 
 
@@ -202,19 +167,19 @@ void timer_0_one_shot() {
   int duration = 0xFF;
   int led_mask = LED_ON_MASK_BASE << colour_pointer;
 
-  TCCR1A = 0;        // reset timer 1
-  TCCR1B = 0;
+  TCCR0A = 0;        // reset timer 1
+  TCCR0B = 0;        // clocked on rising edge of external clock
 
   timer_running = true;
   PORTD |= led_mask;
 
-  // set up Timer 1
+  // set up Timer 0
   TCNT0 = 0;         // reset counter
-  OCR1A =  duration;       // compare A register value (1000 * clock speed)
+  OCR0A =  duration;       // compare A register value (1000 * clock speed)
 
   // Mode 2: CTC, top = OCR0A
   // *** NEED TO FIGURE OUT HOW TO CONFIGURE FOR EXTERNAL CLOCK ON PIN D4
-  Timer0::setMode (2, Timer0::PRESCALE_1024, Timer0::NO_PORT);
+  Timer0::setMode (2, Timer0::T0_RISING, Timer0::NO_PORT);
 
   TIFR0 |= bit (OCF0A);    // clear interrupt flag
   TIMSK0 = bit (OCIE0A);   // interrupt on Compare A Match
