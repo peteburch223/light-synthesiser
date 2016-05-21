@@ -2,14 +2,11 @@
 #include "Arduino.h"
 #include <TimerHelpers.h>
 
-// const byte ledRPin = 2;
-// const byte ledGPin = 3;
-// const byte ledBPin = 4;
-// const byte LED_ON_MASK_BASE = 0x04;
-// const byte LED_OFF_MASK = 0xE3;
-
 const int VALUE_ARRAY_SIZE = 16;
+const int WAIT_COUNT = 0x7F;
 
+
+const byte gatePin = 3;
 const byte ledRPin = 5;
 const byte ledGPin = 6;
 const byte ledBPin = 7;
@@ -35,11 +32,13 @@ int debounce(int current_state, int pin_value, int *counter, int initialize);
 void serial_echo_line(void);
 void readback_array(int);
 // void light_timer(long int duration, int pin);
-void timer_1_one_shot();
-void timer_0_one_shot();
+// void timer_1_one_shot();
+void timer_0_one_shot(int duration);
 void timer_1_free_run();
 void led_sequence();
 void check_for_trigger();
+void wait_state();
+void timer_2_start_wait();
 
 void initialize_globals();
 void initialize_value_array();
@@ -60,11 +59,9 @@ int value_array[VALUE_ARRAY_SIZE][3];
 boolean data_received;
 boolean sequence_triggered;
 boolean timer_running;
+boolean start_wait;
+boolean wait;
 byte colour_pointer;
-
-
-
-
 
 void setup()
 {
@@ -81,7 +78,16 @@ ISR(TIMER0_COMPA_vect)
   TCCR0A = 0;               // reset timer 0
   TCCR0B = 0;
   timer_running = false;
+  start_wait = true;
   colour_pointer += 1;      // increment colour pointer
+}
+
+ISR(TIMER2_COMPA_vect)
+{
+  TCCR2A = 0;               // reset timer 2
+  TCCR2B = 0;
+  wait = false;
+  Serial.println("Wait completed");
 }
 
 void loop()
@@ -92,6 +98,7 @@ void loop()
 
 
   check_for_trigger();
+  wait_state();
   led_sequence();
 
   serial_echo_line();
@@ -112,7 +119,10 @@ void check_for_trigger(){
 
   if (go_current_state != go_previous_state) {
     if(go_current_state == LOW && !sequence_triggered){
+      digitalWrite(gatePin, HIGH);
+
       sequence_triggered = true;
+      start_wait = true;
       selected_channel = channel_current_state;
       colour_pointer = 0;
 
@@ -126,21 +136,33 @@ void check_for_trigger(){
 
 void led_sequence(){
 
-  if (sequence_triggered && !timer_running){
+  if (sequence_triggered && !timer_running && !wait){
+
     if (colour_pointer < 3){
       Serial.print("Colour ");
       Serial.println(colour_pointer, HEX);
       Serial.print("Duration ");
       Serial.println(value_array[selected_channel][colour_pointer], HEX);
 
-      timer_0_one_shot();
-      // one_shot();
+      timer_0_one_shot(0x7F);
+
     } else {
       sequence_triggered = false;
+      digitalWrite(gatePin, LOW);
+
+      wait = false;
       colour_pointer = 0;
       Serial.println("Sequence completed");
-
     }
+  }
+}
+
+void wait_state(){
+  if(start_wait) {
+    Serial.println("Starting wait");
+    timer_2_start_wait();
+    wait = true;
+    start_wait = false;
   }
 }
 
@@ -148,45 +170,66 @@ void timer_1_free_run(){
 
   TCCR1A = 0;        // reset timer 1
   TCCR1B = 0;
-
-  // set up Timer 1
-  OCR1A = 0xF;
+  OCR1A = 0xFF;
   TCNT1 = 0;         // reset counter
-
-  // Mode 4: CTC, top = OCR1A
-  // Toggle Pin 9
-  Timer1::setMode (4, Timer1::PRESCALE_1, Timer1::TOGGLE_A_ON_COMPARE);
+  Timer1::setMode (4, Timer1::PRESCALE_64, Timer1::TOGGLE_A_ON_COMPARE);
 }
 
 
 
 
-void timer_0_one_shot() {
-  // delay (250);   // debugging
+void timer_0_one_shot(int duration) {
 
-  int duration = 0xFF;
   int led_mask = LED_ON_MASK_BASE << colour_pointer;
 
   TCCR0A = 0;        // reset timer 1
   TCCR0B = 0;        // clocked on rising edge of external clock
 
   timer_running = true;
+
   PORTD |= led_mask;
+
 
   // set up Timer 0
   TCNT0 = 0;         // reset counter
   OCR0A =  duration;       // compare A register value (1000 * clock speed)
 
   // Mode 2: CTC, top = OCR0A
-  // *** NEED TO FIGURE OUT HOW TO CONFIGURE FOR EXTERNAL CLOCK ON PIN D4
   Timer0::setMode (2, Timer0::T0_RISING, Timer0::NO_PORT);
 
   TIFR0 |= bit (OCF0A);    // clear interrupt flag
   TIMSK0 = bit (OCIE0A);   // interrupt on Compare A Match
 }
 
+void timer_2_start_wait() {
 
+  TCCR2A = 0;        // reset timer 1
+  TCCR2B = 0;        // clocked on rising edge of external clock
 
+  TCNT2 = 2;         // reset counter
+  OCR2A =  WAIT_COUNT;
+
+  Timer2::setMode (2, Timer2::PRESCALE_1024, Timer0::NO_PORT);
+
+  TIFR2 |= bit (OCF2A);    // clear interrupt flag
+  TIMSK2 = bit (OCIE2A);   // interrupt on Compare A Match
+}
+
+// int timer0_compare_value(int duration) {
+//
+//
+// }
+//
+// int timer1_prescaler_value(int duration) {
+//
+//
+//
+//   return duration
+// }
+//
+// int timer1_compare_value(int duration) {
+//
+// }
 
 int debounce(int current_state, int reading, int *counter, int initialize) {
   int DEBOUNCE_COUNT = 10;
@@ -276,6 +319,7 @@ void setup_io() {
   pinMode(selPin3, INPUT);
   pinMode(startPin, INPUT);
 
+  pinMode(gatePin, OUTPUT);
   pinMode(ledRPin, OUTPUT);
   pinMode(ledGPin, OUTPUT);
   pinMode(ledBPin, OUTPUT);
@@ -283,6 +327,7 @@ void setup_io() {
 
   pinMode(ledOnBoardPin, OUTPUT);
 
+  digitalWrite(gatePin, LOW);
   digitalWrite(ledRPin, LOW);
   digitalWrite(ledGPin, LOW);
   digitalWrite(ledBPin, LOW);
@@ -296,6 +341,8 @@ void initialize_globals(){
   data_received = false;
   sequence_triggered = false;
   timer_running = false;
+  start_wait = false;
+  wait = false;
   colour_pointer = 0;
 }
 
@@ -308,26 +355,4 @@ void initialize_value_array() {
       value_array[i][j] = 0xFFFFFF00 | colour | channel;
     }
   }
-}
-
-
-// UNUSED FUNCTIONS
-
-void write_to_leds(int value) {
-  digitalWrite(ledRPin, (value & 1));
-  digitalWrite(ledGPin, (value & 2));
-  digitalWrite(ledBPin, (value & 4));
-}
-
-void light_timer(long int duration, int pin) {
-  // noInterrupts();
-  digitalWrite(pin, HIGH);
-
-  while(duration > 0){
-    // Serial.println(duration,HEX);
-    delay(5);
-    duration--;
-  }
-  digitalWrite(pin, LOW);
-  // interrupts();
 }
