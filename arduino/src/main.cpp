@@ -1,6 +1,7 @@
 
 #include "Arduino.h"
 #include <TimerHelpers.h>
+#include "ChannelSelector.cpp"
 
 const int VALUE_ARRAY_SIZE = 16;
 const int WAIT_COUNT = 0x7F;
@@ -36,6 +37,8 @@ void timer_2_start_wait();
 
 void initialize_globals();
 void initialize_value_array();
+
+ChannelSelector channel(0x08, 0xF);
 
 
 int go_previous_state;
@@ -90,6 +93,7 @@ void loop()
   channel_current_state = debounce(channel_current_state, read_selector(),&channel_debounce_counter, 0);
   go_current_state = debounce(go_current_state, digitalRead(START_PIN), &go_debounce_counter, 0);
 
+  channel_current_state = channel.current_channel();
 
   check_for_trigger();
   wait_state();
