@@ -204,21 +204,24 @@ void timer_2_start_wait() {
   TIMSK2 = bit (OCIE2A);   // interrupt on Compare A Match
 }
 
-// int timer0_compare_value(int duration) {
-//
-//
-// }
-//
-// int timer1_prescaler_value(int duration) {
-//
-//
-//
-//   return duration
-// }
-//
-// int timer1_compare_value(int duration) {
-//
-// }
+int timer0_compare_value(int duration) {
+
+  int compare_value = 0;
+
+  return compare_value
+
+}
+
+int timer1_prescaler_value(int duration) {
+  return Timer1::PRESCALE_64
+}
+
+int timer1_compare_value(int duration) {
+  int compare_value = 0;
+
+  return compare_value;
+
+}
 
 int debounce(int current_state, int reading, int *counter, int initialize) {
   int DEBOUNCE_COUNT = 10;
