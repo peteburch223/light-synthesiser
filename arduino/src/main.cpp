@@ -1,8 +1,9 @@
 
 #include "Arduino.h"
 #include <TimerHelpers.h>
+#include "TimerCalculator.h"
 
-const int VALUE_ARRAY_SIZE = 16;
+const unsigned long VALUE_ARRAY_SIZE = 16;
 const int WAIT_COUNT = 0x7F;
 
 
@@ -48,6 +49,8 @@ int channel_debounce_counter;
 int selected_channel;
 
 int value_array[VALUE_ARRAY_SIZE][3];
+
+TimerCalculator timer;
 
 
 boolean data_received;
@@ -122,6 +125,12 @@ void check_for_trigger(){
 
       Serial.print("sequence_triggered channel ");
       Serial.println(channel_current_state, HEX);
+      timer.calculate(0x1FFFF);
+      unsigned long temp = timer.t1_comparator;
+      Serial.print("*** CALCULATED VALUE: ");
+      Serial.println(temp, HEX);
+
+
     }
   }
 }
@@ -208,12 +217,12 @@ int timer0_compare_value(int duration) {
 
   int compare_value = 0;
 
-  return compare_value
+  return compare_value;
 
 }
 
 int timer1_prescaler_value(int duration) {
-  return Timer1::PRESCALE_64
+  return Timer1::PRESCALE_64;
 }
 
 int timer1_compare_value(int duration) {
@@ -341,7 +350,7 @@ void initialize_value_array() {
     for(int j=0; j<3; j++){
       int channel = i;
       int colour = j << 4;
-      value_array[i][j] = 0xFFFFFF00 | colour | channel;
+      value_array[i][j] = 0x1 | colour | channel;
     }
   }
 }
