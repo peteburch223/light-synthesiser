@@ -5,22 +5,23 @@
 
 Debounce::Debounce(unsigned char defaultState)
 {
-	current_state = defaultState;
+	debouncedValue = defaultState;
 	counter = 0;
 };
 
-void Debounce::debounced_state(unsigned char reading)
+unsigned char Debounce::debounce(unsigned char reading)
 {
 	if (counter >= DEBOUNCE_COUNT) {
 		counter = 0;
-		current_state = reading;
+		debouncedValue = reading;
 	}
 	else {
-		if (reading == current_state && counter > 0) {
+		if (reading == debouncedValue && counter > 0) {
 			(counter)--;
 		}
-		if (reading != current_state) {
+		if (reading != debouncedValue) {
 			(counter)++;
 		}
 	}
+	return debouncedValue;
 }
