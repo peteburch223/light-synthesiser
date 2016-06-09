@@ -6,8 +6,11 @@
 #include <Arduino.h>
 #include "ReadPortValue.h"
 #include "SequenceState.h"
+#include "Duration.h"
+#include "TimerController.h"
+#include "Timers.h"
 
-
+#define BAUD_RATE 115200
 #define VALUE_ARRAY_SIZE 16
 #define SELECTOR_PIN_MASK 0x0F
 #define SELECTOR_DEFAULT 0x00
@@ -15,12 +18,7 @@
 #define TRIGGER_DEFAULT 0x00
 #define PINC_ADDRESS 0x26;
 
-struct Duration {
-	unsigned long duration;
-	unsigned long t2_prescaler_pointer;
-	unsigned long t2_comparator;
-	unsigned long t1_comparator;
-};
+
 
 
 
@@ -32,13 +30,13 @@ unsigned char * pinc = (unsigned char *) PINC_ADDRESS;
 ReadPortValue selector(SELECTOR_DEFAULT, pinc, SELECTOR_PIN_MASK);
 ReadPortValue trigger(TRIGGER_DEFAULT, pinc, TRIGGER_PIN_MASK);
 SequenceState stateMachine;
-// TimerController timer;
+TimerController timer(ArduinoTimer1 timer1, ArduinoTimer2, Duration value_array);
 boolean timerComplete;
 
 // Function declarations - these will be moved to objects
 
 void serial_echo_line(void);
-void readback_array(int channel);
+void readback_array(void);
 void initialize_value_array(void);
 void debugSerial(void);
 
@@ -48,17 +46,20 @@ void debugSerial(void);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-	Serial.begin(115200);
+	Serial.begin(BAUD_RATE);
 	// setup_io();
 	dataReceived = false;
 	timerComplete = false;
 	initialize_value_array();
+	readback_array();
 }
 
 ISR(TIMER1_COMPA_vect)
 {
-  TCCR1A = 0;               // reset timer 2
-  TCCR1B = 0;
+  TCCR1A = 0x00;
+  TCCR1B = 0x00;
+	TCCR2A = 0x00;
+	TCCR2B = 0x00;
 	timerComplete = true;
 }
 
@@ -66,7 +67,7 @@ ISR(TIMER1_COMPA_vect)
 // the loop function runs over and over again until power down or reset
 void loop() {
 
-	// timer.checkForStart(stateMachine, selector.valueShiftedToRoot());
+	timer.checkForStart(stateMachine, selector.valueShiftedToRoot());
 
 	stateMachine.buttonState = trigger.valueShiftedToRoot();
 	stateMachine.timerComplete = timerComplete;
@@ -76,10 +77,10 @@ void loop() {
 
 	serial_echo_line();
 	if (dataReceived) {
-		readback_array(0);
+		readback_array();
 	}
 
-debugSerial();
+	debugSerial();
 	delay(100);
 }
 
@@ -153,11 +154,11 @@ void serial_echo_line(void) {
 	}
 }
 
-void readback_array(int channel) {
+void readback_array(void) {
 	Serial.println("START OF READBACK");
-	Serial.print("Channel Selected:");
-	Serial.print(channel, HEX);
-	Serial.print('\n');
+	// Serial.print("Channel Selected:");
+	// Serial.print(channel, HEX);
+	// Serial.print('\n');
 
 	for (int i = 0; i<16; i++) {
 		Serial.print(value_array[i][0].duration, HEX);
