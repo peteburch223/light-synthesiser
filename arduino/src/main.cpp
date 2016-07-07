@@ -19,11 +19,6 @@
 #define TRIGGER_DEFAULT 0x00
 #define PINC_ADDRESS 0x26;
 
-
-
-
-
-
 bool dataReceived;
 Duration value_array[VALUE_ARRAY_SIZE][3];
 
@@ -61,11 +56,12 @@ void setup() {
 
 ISR(TIMER1_COMPA_vect)
 {
+	PIND &= 0xE3;		//Clear colour output pins
   TCCR1A = 0x00;
   TCCR1B = 0x00;
 	TCCR2A = 0x00;
 	TCCR2B = 0x00;
-	timerComplete = true;
+	stateMachine.setTimerComplete();
   Serial.println("T1 interrupt");
 }
 
@@ -76,12 +72,7 @@ void loop() {
 	timer.checkForStart(selector.valueShiftedToRoot());
 
 	stateMachine.buttonState = trigger.valueShiftedToRoot();
-	stateMachine.timerComplete = timerComplete;
 	stateMachine.advance();
-
-	// Serial.print("stateMachine.startTimer: ");
-  // Serial.println(stateMachine.startTimer);
-
 
 	serial_echo_line();
 	if (dataReceived) {
@@ -94,10 +85,7 @@ void loop() {
 
 void debugSerial(void)
 {
-	Serial.print("State: ");
-	Serial.println(stateMachine.state, HEX);
-	Serial.print("Colour: ");
-	Serial.println(stateMachine.colour, HEX);
+
 
 
 	unsigned char temp;

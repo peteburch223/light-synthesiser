@@ -13,17 +13,20 @@
     bool isStartTimer(void);
     unsigned char getState(void);
     unsigned char getColour(void);
-    bool startTimer;
-  	bool timerComplete;
-  	unsigned char buttonState;
-  	unsigned char state;
-  	unsigned char colour;
+    void setTimerComplete(void);
+    unsigned char buttonState;
 
   private:
   	unsigned char previousButtonState;
   	bool isTimerComplete(void);
+    void clearTimerComplete(void);
   	void getNextColour(void);
   	unsigned char nextState;
+    bool startTimer;
+    bool timerComplete;
+
+    unsigned char state;
+    unsigned char colour;
   };
 
 #endif
