@@ -29,7 +29,7 @@ void SequenceState::advance(void)
 		break;
 
 	case WAIT:
-		Serial.println("State: WAIT");
+		// Serial.println("State: WAIT");
 		if (isTimerComplete())
 		{
 			clearTimerComplete();
@@ -41,7 +41,7 @@ void SequenceState::advance(void)
 		break;
 
 	case DISPLAY_COLOUR:
-		 Serial.println("State: DISPLAY_COLOUR");
+		//  Serial.println("State: DISPLAY_COLOUR");
 
 		if (isTimerComplete())
     {

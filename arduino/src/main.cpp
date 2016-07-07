@@ -56,7 +56,7 @@ void setup() {
 
 ISR(TIMER1_COMPA_vect)
 {
-	PIND &= 0xE3;		//Clear colour output pins
+	PORTD &= 0xE3;		//Clear colour output pins
   TCCR1A = 0x00;
   TCCR1B = 0x00;
 	TCCR2A = 0x00;

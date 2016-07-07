@@ -1,5 +1,6 @@
 #include "ArduinoTimer2.h"
 #include "arduino.h"
+#include "States.h"
 
 #define OC2A 11
 
@@ -19,12 +20,15 @@ void ArduinoTimer2::setup(void)
   Serial.println(comparator, HEX);
 }
 
-void ArduinoTimer2::start(void)
+void ArduinoTimer2::start(unsigned char colour)
 {
   Serial.println("...starting Timer 2");
   Serial.print("......Prescaler: ");
   Serial.println(prescaler, HEX);
+  Serial.print("......Colour: ");
+  Serial.println(colour, HEX);
   setMode (4, prescaler, Timer2::TOGGLE_A_ON_COMPARE);
+  PORTD |= (1 << colour);
 }
 
 void ArduinoTimer2::setMode (const byte mode, const byte clock, const byte port)

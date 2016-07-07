@@ -9,7 +9,7 @@
     public:
       ArduinoTimer2(void);
       void setup(void);
-      void start(void);
+      void start(unsigned char colour);
       unsigned long comparator;
       unsigned long prescaler;
     private:

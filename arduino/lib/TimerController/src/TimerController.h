@@ -17,6 +17,7 @@
 
   private:
     void setupTimers(Duration duration);
+    unsigned char colour;
     ArduinoTimer1 * _timer1;
     ArduinoTimer2 * _timer2;
     SequenceState * _stateMachine;

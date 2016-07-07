@@ -1,9 +1,10 @@
 #include "TimerController.h"
 #include "arduino.h"
+#include "States.h"
 
 // configure these values for a delay of 10ms
 #define WAIT_T1_COMPARATOR 0xFE
-#define WAIT_T2_PRESCALER_POINTER 0x03
+#define WAIT_T2_PRESCALER_POINTER 0x01
 #define WAIT_T2_COMPARATOR 0xFE
 
 #define COLOUR_T1_COMPARATOR 0xFF
@@ -25,6 +26,7 @@ void TimerController::checkForStart(unsigned char channel)
     switch (_stateMachine->getState())
     {
       case WAIT:
+        colour = 0;
         Serial.println("TimerController - Starting Timer - State: WAIT");
         duration.duration = 0;
         duration.t2_prescaler_pointer = (unsigned long) WAIT_T2_PRESCALER_POINTER;
@@ -34,8 +36,9 @@ void TimerController::checkForStart(unsigned char channel)
       break;
 
       case DISPLAY_COLOUR:
+        colour = _stateMachine->getColour() + 2;
         Serial.print("TimerController - Starting Timer - State: DISPLAY_COLOUR: ");
-        Serial.println(_stateMachine->getColour());
+        Serial.println(colour);
         // duration = _durations[channel][_stateMachine->getColour()];
         duration.t2_prescaler_pointer = (unsigned long) COLOUR_T2_PRESCALER_POINTER;
         duration.t2_comparator = (unsigned long) COLOUR_T2_COMPARATOR;
@@ -58,5 +61,5 @@ void TimerController::setupTimers(Duration duration)
   _timer1->setup();
   _timer2->setup();
   _timer1->start();
-  _timer2->start();
+  _timer2->start(colour);
 }
