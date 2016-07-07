@@ -1,17 +1,8 @@
 #include "Arduino.h"
 #include "TimerHelpers.h"
 
-#ifndef _ArduinoTimers_h
-  #define _ArduinoTimers_h
-
-  class ArduinoTimer1
-  {
-    public:
-      ArduinoTimer1(void);
-      void setup(void);
-      void start(void);
-      unsigned long comparator;
-  };
+#ifndef _ArduinoTimer2_h
+  #define _ArduinoTimer2_h
 
   class ArduinoTimer2
   {
@@ -21,6 +12,7 @@
       void start(void);
       unsigned long comparator;
       unsigned long prescaler;
+    private:
+      void setMode (const byte mode, const byte clock, const byte port);
   };
-
 #endif

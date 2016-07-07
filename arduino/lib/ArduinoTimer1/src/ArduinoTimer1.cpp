@@ -1,4 +1,4 @@
-#include "Timers.h"
+#include "ArduinoTimer1.h"
 
 ArduinoTimer1::ArduinoTimer1(void)
 {}
@@ -13,23 +13,20 @@ void ArduinoTimer1::setup(void)
 
 void ArduinoTimer1::start(void)
 {
-  Timer1::setMode (2, Timer1::T1_RISING, Timer1::NO_PORT);
+  setMode (2, Timer1::T1_RISING, Timer1::NO_PORT);
   TIFR1 |= bit (OCF1A);    // clear interrupt flag
   TIMSK1 = bit (OCIE1A);   // interrupt on Compare A Match
 }
 
-ArduinoTimer2::ArduinoTimer2(void)
-{}
-
-void ArduinoTimer2::setup(void)
+void ArduinoTimer1::setMode (const byte mode, const byte clock, const byte port)
 {
-  TCCR2A = 0;
-  TCCR2B = 0;
-  OCR2A = 0xFF;
-  TCNT2 = 0;
-}
+if (mode < 0 || mode > 15)  // sanity check
+  return;
 
-void ArduinoTimer2::start(void)
-{
-  Timer2::setMode (4, prescaler, Timer2::TOGGLE_A_ON_COMPARE);
-}
+// reset existing flags
+TCCR1A = 0;
+TCCR1B = 0;
+
+TCCR1A |= (Timer1::Modes [mode] [0]) | port;
+TCCR1B |= (Timer1::Modes [mode] [1]) | clock;
+} 

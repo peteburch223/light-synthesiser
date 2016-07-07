@@ -5,12 +5,11 @@
 #define WAIT_T2_PRESCALER_POINTER 0x0
 #define WAIT_T2_COMPARATOR 0x0
 
-
-TimerController::TimerController(ArduinoTimer1 timer1, ArduinoTimer1 timer2, Duration durations[][3])
+TimerController::TimerController(ArduinoTimer1 timer1, ArduinoTimer2 timer2, Duration (&arr)[16][3])
+  : _durations(arr)
 {
   _timer1 = timer1;
   _timer2 = timer2;
-  _durations = durations;
 }
 
 void TimerController::checkForStart(SequenceState stateMachine, unsigned char channel)
@@ -21,6 +20,7 @@ void TimerController::checkForStart(SequenceState stateMachine, unsigned char ch
     switch (stateMachine.state)
     {
       case WAIT:
+      Serial.println("TimerController State: WAIT");
         duration = {0,
                    (unsigned long) WAIT_T2_PRESCALER_POINTER,
                    (unsigned long) WAIT_T2_COMPARATOR,
@@ -28,8 +28,9 @@ void TimerController::checkForStart(SequenceState stateMachine, unsigned char ch
 
       break;
 
-      case COLOUR:
-        duration = _durations[channel][stateMachine.colour]
+      case DISPLAY_COLOUR:
+        Serial.println("TimerController State: DISPLAY_COLOUR");
+        duration = _durations[channel][stateMachine.colour];
       break;
     }
     _timer1.setup();

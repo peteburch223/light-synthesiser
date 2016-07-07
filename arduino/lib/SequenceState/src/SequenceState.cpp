@@ -1,4 +1,5 @@
 // #include "stdafx.h"
+#include "arduino.h"
 #include "SequenceState.h"
 
 #ifndef LOW
@@ -14,7 +15,6 @@ SequenceState::SequenceState()
 	buttonState = LOW;
 	previousButtonState = LOW;
 	state = AWAIT_COMMAND;
-	state = AWAIT_COMMAND;
 	timerComplete = false;
 	startTimer = false;
 	colour = NO_COLOUR;
@@ -25,16 +25,21 @@ void SequenceState::advance(void)
 	switch (state)
 	{
 	case AWAIT_COMMAND:
+    Serial.println("State: AWAIT_COMMAND");
 		if (buttonState != previousButtonState && buttonState == HIGH)
 		{
+			Serial.println("...triggered");
 			startTimer = true;
 			state = WAIT;
 		}
 		break;
 
 	case WAIT:
+		Serial.println("State: WAIT");
+
 		if (isTimerComplete())
 		{
+			Serial.println("...timer complete");
 			getNextColour();
 			startTimer = true;
 			state = DISPLAY_COLOUR;
@@ -42,8 +47,11 @@ void SequenceState::advance(void)
 		break;
 
 	case DISPLAY_COLOUR:
+		Serial.println("State: DISPLAY_COLOUR");
+
 		if (isTimerComplete())
     {
+			Serial.println("...timer complete");
 			if (colour == BLUE)
 				state = AWAIT_COMMAND;
 			else

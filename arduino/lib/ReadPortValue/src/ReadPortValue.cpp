@@ -28,5 +28,6 @@ unsigned char ReadPortValue::value(void)
 
 unsigned char ReadPortValue::valueShiftedToRoot(void)
 {
+	// Serial.println(value(), HEX);
 	return ~(value() >> shiftsToRoot) & (pinMask >> shiftsToRoot);
 }

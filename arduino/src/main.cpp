@@ -8,7 +8,8 @@
 #include "SequenceState.h"
 #include "Duration.h"
 #include "TimerController.h"
-#include "Timers.h"
+#include "ArduinoTimer1.h"
+#include "ArduinoTimer2.h"
 
 #define BAUD_RATE 115200
 #define VALUE_ARRAY_SIZE 16
@@ -25,12 +26,16 @@
 
 boolean dataReceived;
 Duration value_array[VALUE_ARRAY_SIZE][3];
+
+Duration durations;
 unsigned char * pinc = (unsigned char *) PINC_ADDRESS;
 
 ReadPortValue selector(SELECTOR_DEFAULT, pinc, SELECTOR_PIN_MASK);
 ReadPortValue trigger(TRIGGER_DEFAULT, pinc, TRIGGER_PIN_MASK);
 SequenceState stateMachine;
-TimerController timer(ArduinoTimer1 timer1, ArduinoTimer2, Duration value_array);
+ArduinoTimer1 timer1;
+ArduinoTimer2 timer2;
+TimerController timer(timer1, timer2, value_array);
 boolean timerComplete;
 
 // Function declarations - these will be moved to objects
@@ -80,7 +85,7 @@ void loop() {
 		readback_array();
 	}
 
-	debugSerial();
+	// debugSerial();
 	delay(100);
 }
 
