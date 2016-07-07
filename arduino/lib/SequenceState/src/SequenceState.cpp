@@ -2,13 +2,13 @@
 #include "arduino.h"
 #include "SequenceState.h"
 
-#ifndef LOW
-#define LOW 0
-#endif // !LOW
-
-#ifndef HIGH
-#define HIGH 1
-#endif // !LOW
+// #ifndef LOW
+// #define LOW 0
+// #endif // !LOW
+//
+// #ifndef HIGH
+// #define HIGH 1
+// #endif // !LOW
 
 SequenceState::SequenceState()
 {
@@ -25,7 +25,6 @@ void SequenceState::advance(void)
 	switch (state)
 	{
 	case AWAIT_COMMAND:
-    Serial.println("State: AWAIT_COMMAND");
 		if (buttonState != previousButtonState && buttonState == HIGH)
 		{
 			Serial.println("...triggered");
@@ -35,11 +34,9 @@ void SequenceState::advance(void)
 		break;
 
 	case WAIT:
-		Serial.println("State: WAIT");
-
 		if (isTimerComplete())
 		{
-			Serial.println("...timer complete");
+			Serial.println("...WAIT timer complete");
 			getNextColour();
 			startTimer = true;
 			state = DISPLAY_COLOUR;
@@ -47,11 +44,11 @@ void SequenceState::advance(void)
 		break;
 
 	case DISPLAY_COLOUR:
-		Serial.println("State: DISPLAY_COLOUR");
+		// Serial.println("State: DISPLAY_COLOUR");
 
 		if (isTimerComplete())
     {
-			Serial.println("...timer complete");
+			Serial.println("...DISPLAY_COLOUR timer complete");
 			if (colour == BLUE)
 				state = AWAIT_COMMAND;
 			else
@@ -63,17 +60,29 @@ void SequenceState::advance(void)
 	previousButtonState = buttonState;
 }
 
-bool SequenceState::isStartTimer(void)
+void SequenceState::clearStartTimer(void)
 {
-	bool temp = startTimer;
 	startTimer = false;
-	return temp;
-
 }
 
+unsigned char SequenceState::getState(void)
+{
+	return state;
+}
+
+unsigned char SequenceState::getColour(void)
+{
+	return colour;
+}
+bool SequenceState::isStartTimer(void)
+{
+	return startTimer;
+}
 bool SequenceState::isTimerComplete(void)
 {
 	bool temp = timerComplete;
+	// Serial.print("Timer Complete: ");
+	// Serial.println(temp, HEX);
 	timerComplete = false;
 	return temp;
 }

@@ -1,4 +1,5 @@
 #include "ArduinoTimer1.h"
+#include "arduino.h"
 
 ArduinoTimer1::ArduinoTimer1(void)
 {}
@@ -29,4 +30,4 @@ TCCR1B = 0;
 
 TCCR1A |= (Timer1::Modes [mode] [0]) | port;
 TCCR1B |= (Timer1::Modes [mode] [1]) | clock;
-} 
+}

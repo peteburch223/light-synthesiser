@@ -24,7 +24,7 @@
 
 
 
-boolean dataReceived;
+bool dataReceived;
 Duration value_array[VALUE_ARRAY_SIZE][3];
 
 Duration durations;
@@ -35,8 +35,8 @@ ReadPortValue trigger(TRIGGER_DEFAULT, pinc, TRIGGER_PIN_MASK);
 SequenceState stateMachine;
 ArduinoTimer1 timer1;
 ArduinoTimer2 timer2;
-TimerController timer(timer1, timer2, value_array);
-boolean timerComplete;
+TimerController timer(&timer1, &timer2, &stateMachine, value_array);
+bool timerComplete;
 
 // Function declarations - these will be moved to objects
 
@@ -66,18 +66,21 @@ ISR(TIMER1_COMPA_vect)
 	TCCR2A = 0x00;
 	TCCR2B = 0x00;
 	timerComplete = true;
+  Serial.println("T1 interrupt");
 }
 
 
 // the loop function runs over and over again until power down or reset
 void loop() {
 
-	timer.checkForStart(stateMachine, selector.valueShiftedToRoot());
+	timer.checkForStart(selector.valueShiftedToRoot());
 
 	stateMachine.buttonState = trigger.valueShiftedToRoot();
 	stateMachine.timerComplete = timerComplete;
 	stateMachine.advance();
 
+	// Serial.print("stateMachine.startTimer: ");
+  // Serial.println(stateMachine.startTimer);
 
 
 	serial_echo_line();

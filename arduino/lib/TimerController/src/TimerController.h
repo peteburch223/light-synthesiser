@@ -12,12 +12,14 @@
   class TimerController
   {
   public:
-    TimerController(ArduinoTimer1 timer1, ArduinoTimer2 timer2, Duration (&arr)[16][3]);
-    void checkForStart(SequenceState stateMachine, unsigned char channel);
+    TimerController(ArduinoTimer1 *timer1, ArduinoTimer2 *timer2, SequenceState *stateMachine, Duration (&arr)[16][3]);
+    void checkForStart(unsigned char channel);
 
   private:
-    ArduinoTimer1 _timer1;
-    ArduinoTimer2 _timer2;
+    void setupTimers(Duration duration);
+    ArduinoTimer1 * _timer1;
+    ArduinoTimer2 * _timer2;
+    SequenceState * _stateMachine;
     Duration (&_durations)[16][3];
   };
 

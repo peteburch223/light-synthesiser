@@ -1,4 +1,5 @@
 #include "ArduinoTimer2.h"
+#include "arduino.h"
 
 ArduinoTimer2::ArduinoTimer2(void)
 {}
@@ -7,12 +8,17 @@ void ArduinoTimer2::setup(void)
 {
   TCCR2A = 0;
   TCCR2B = 0;
-  OCR2A = 0xFF;
+  OCR2A = comparator;
   TCNT2 = 0;
+  Serial.print("Comparator: ");
+  Serial.println(comparator, HEX);
 }
 
 void ArduinoTimer2::start(void)
 {
+  Serial.println("...starting Timer 2");
+  Serial.print("Prescaler: ");
+  Serial.println(prescaler, HEX);
   setMode (4, prescaler, Timer2::TOGGLE_A_ON_COMPARE);
 }
 
@@ -27,4 +33,5 @@ TCCR2B = 0;
 
 TCCR2A |= (Timer2::Modes [mode] [0]) | port;
 TCCR2B |= (Timer2::Modes [mode] [1]) | clock;
+Serial.println("...Timer 2 mode set");
 }
