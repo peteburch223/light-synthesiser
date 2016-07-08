@@ -50,7 +50,6 @@ void initializeValueArray(void);
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(BAUD_RATE);
-	// setup_io();
 	dataReceived = false;
 	timerComplete = false;
 	initializeValueArray();
@@ -231,36 +230,36 @@ void readbackCalculatedValues(void) {
 
 void initializeValueArray(void)
 {
+	TimerCalculator timerCalc;
 
-	value_array[0][0].t1_comparator = 0x0265;
-	value_array[0][0].t2_comparator = 0xFF;
-	value_array[0][0].t2_prescaler_pointer = 0x06;
+	value_array[0][0].duration = 40016640;
+	value_array[0][1].duration = 5597760;
+	value_array[0][2].duration = 801720;
 
-	value_array[0][1].t1_comparator = 0x0157;
-	value_array[0][1].t2_comparator = 0xFF;
-	value_array[0][1].t2_prescaler_pointer = 0x04;
+	timerCalc.calculate(value_array[0][0].duration);
+	value_array[0][0].t1_comparator = timerCalc.t1_comparator;
+	value_array[0][0].t2_comparator = timerCalc.t2_comparator;
+	value_array[0][0].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
 
-	value_array[0][2].t1_comparator = 0x0189;
-	value_array[0][2].t2_comparator = 0xFF;
-	value_array[0][2].t2_prescaler_pointer = 0x02;
+	timerCalc.calculate(value_array[0][1].duration);
+	value_array[0][1].t1_comparator = timerCalc.t1_comparator;
+	value_array[0][1].t2_comparator = timerCalc.t2_comparator;
+	value_array[0][1].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+
+	timerCalc.calculate(value_array[0][2].duration);
+	value_array[0][2].t1_comparator = timerCalc.t1_comparator;
+	value_array[0][2].t2_comparator = timerCalc.t2_comparator;
+	value_array[0][2].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+
+	// value_array[0][0].t1_comparator = 0x0265;
+	// value_array[0][0].t2_comparator = 0xFF;
+	// value_array[0][0].t2_prescaler_pointer = 0x06;
+	//
+	// value_array[0][1].t1_comparator = 0x0157;
+	// value_array[0][1].t2_comparator = 0xFF;
+	// value_array[0][1].t2_prescaler_pointer = 0x04;
+	//
+	// value_array[0][2].t1_comparator = 0x0189;
+	// value_array[0][2].t2_comparator = 0xFF;
+	// value_array[0][2].t2_prescaler_pointer = 0x02;
 }
-
-// void setup_io(void) {
-//   pinMode(SEL_PIN_0, INPUT);
-//   pinMode(SEL_PIN_1, INPUT);
-//   pinMode(SEL_PIN_2, INPUT);
-//   pinMode(SEL_PIN_3, INPUT);
-//   pinMode(START_PIN, INPUT);
-//
-//   pinMode(GATE_PIN, OUTPUT);
-//   pinMode(RED_PIN, OUTPUT);
-//   pinMode(GREEN_PIN, OUTPUT);
-//   pinMode(BLUE_PIN, OUTPUT);
-//   pinMode(TIMER0_CLOCK_PIN, OUTPUT);
-//
-//   digitalWrite(GATE_PIN, LOW);
-//   digitalWrite(RED_PIN, LOW);
-//   digitalWrite(GREEN_PIN, LOW);
-//   digitalWrite(BLUE_PIN, LOW);
-//   digitalWrite(TIMER0_CLOCK_PIN, LOW);
-// }

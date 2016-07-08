@@ -6,10 +6,11 @@
 ArduinoTimer1::ArduinoTimer1(void)
 {
   pinMode(T1, INPUT);
-  TCCR1A = 0x00;
-  TCCR1B = 0x00;
+  setMode (4, Timer1::T1_RISING, Timer1::NO_PORT);
   OCR1A = 0x00;
 	TCNT1 = 0x00;
+  TIMSK1 = 0x00;
+  TIFR1 = 0x00;
 }
 
 void ArduinoTimer1::setup(void)
@@ -18,22 +19,17 @@ void ArduinoTimer1::setup(void)
   // byte MSByte = (comparator >> 8) & 0xFF;
 
 
-  unsigned int tempOCR1A;
-
 
 
   Serial.print("......comparator: ");
   Serial.println(comparator, HEX);
-  // Serial.print("......LSByte: ");
-  // Serial.println(LSByte, HEX);
 
   OCR1A = comparator;
 
   TCCR1A = 0;       // reset timer 1
   TCCR1B = 0;       // clocked on rising edge of external clock
-  // OCR1AL = LSByte;    // MSByte of comparator value
-  // OCR1AH = MSByte;    // LSByte of comparator value
 
+  unsigned int tempOCR1A;
   tempOCR1A = OCR1A;
   Serial.print("......OCR1A: ");
   Serial.println(tempOCR1A, HEX);

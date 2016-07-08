@@ -55,7 +55,6 @@ void SequenceState::advance(void)
 			}
 			else
 			{
-				Serial.println("...waiting for next colour");
 				startTimer = true;
 				state = WAIT;
 			}

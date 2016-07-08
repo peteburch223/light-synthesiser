@@ -4,7 +4,9 @@
 // ALL DURATION VALUES ARE IN CLOCK CYCLES
 
 // #define CLOCK_PERIOD 125 // ns
-#define MAX_T2_COMPARATOR 255
+#define MAX_T2_COMPARATOR 0xFF
+#define MAX_T1_COMPARATOR 0xFFFF
+#define MAX_T2_PRESCALER_POINTER 6
 
 TimerCalculator::TimerCalculator() :
   t2_prescaler_array{1, 8, 32, 64, 128, 256, 1024}
@@ -13,48 +15,55 @@ TimerCalculator::TimerCalculator() :
 
 void TimerCalculator::calculate(unsigned long duration)
 {
-  // readback_array();
   _duration = duration;
   t2_prescaler_pointer = 0;
   t2_comparator = 1;
-  t1_comparator = 1;
-  // clock_period = CLOCK_PERIOD;
-  unsigned long max_t1_comparator = 65535;
-  unsigned long max_duration = calc_period(max_t1_comparator);
-  //Serial.print("duration: ");
-  //Serial.println(_duration);
-  //Serial.print("max_duration: ");
-  //Serial.println(max_duration);
 
-  while (duration > max_duration )
+  while (true)
   {
 
-    // Serial.print("duration: ");
-    // Serial.println(_duration);
-    // Serial.print("max_duration: ");
-    // Serial.println(max_duration);
-
-    if (t2_comparator < (t2_prescaler_array[t2_prescaler_pointer + 1] / t2_prescaler_array[t2_prescaler_pointer]))
+    // if duration can be achieved with T2 parameters then stop
+    if (calcDuration(MAX_T1_COMPARATOR) > duration)
     {
-      t2_comparator += 1;
-
-    } else {
-      t2_comparator = 1;
-      t2_prescaler_pointer += 1;
+      Serial.println("...duration achievable - break");
+      break;
     }
-    max_duration = calc_period(max_t1_comparator);
-    if(t2_comparator == MAX_T2_COMPARATOR) break;
+
+    if (t2_prescaler_pointer == MAX_T2_PRESCALER_POINTER)
+    {
+      if (t2_comparator == MAX_T2_COMPARATOR)
+      {
+        Serial.println("...max T2 comparator - break");      
+        break;
+      }
+      else
+      {
+        t2_comparator += 1;
+      }
+    }
+    else
+    {
+      if (t2_comparator < (t2_prescaler_array[t2_prescaler_pointer + 1] / t2_prescaler_array[t2_prescaler_pointer]))
+      {
+        t2_comparator += 1;
+      } else {
+        t2_comparator = 1;
+        t2_prescaler_pointer += 1;
+      }
+    }
+
     debug_data();
   }
 
-  // Serial.print("calc_t2_period: ");
-  // Serial.println(calc_t2_period());
-  // Serial.print("result: ");
-  // Serial.println(duration / calc_t2_period());
-  t1_comparator = (int)(duration / calc_t2_period());
+  t1_comparator = (unsigned long)(duration / calc_t2_period());
+
+  Serial.println("*****************");
+  Serial.print("t1_comparator: ");
+  Serial.println(t1_comparator, HEX);
+  Serial.println("*****************");
 }
 
-unsigned long TimerCalculator::calc_period(unsigned long t1_comparator_value)
+unsigned long TimerCalculator::calcDuration(unsigned long t1_comparator_value)
 {
   unsigned long t2_period = calc_t2_period() * t2_comparator;
   return t1_comparator_value * t2_period;
@@ -62,27 +71,22 @@ unsigned long TimerCalculator::calc_period(unsigned long t1_comparator_value)
 
 unsigned long TimerCalculator::calc_t2_period(void)
 {
-  // unsigned long prescaler = clock_period * t2_prescaler_array[t2_prescaler_pointer];
   unsigned long prescaler = t2_prescaler_array[t2_prescaler_pointer];
   return prescaler * t2_comparator;
 }
+
 void TimerCalculator::debug_data(void)
 {
-  // Serial.println("*****************");
-  // Serial.print("t1_comparator: ");
-  // Serial.println(t1_comparator);
-  // Serial.print("t2_prescaler: ");
-  // Serial.println(t2_prescaler_array[t2_prescaler_pointer]);
-  // Serial.print("t2_comparator: ");
-  // Serial.println(t2_comparator);
-  // Serial.println("*****************");
-}
+  Serial.println("*****************");
+  Serial.print("duration: ");
+  Serial.println(_duration);
 
-// void TimerCalculator::readback_array(void) {
-//   Serial.println("START OF READBACK");
-//
-//   for(int i = 0; i<7; i++){
-//     Serial.println(t2_prescaler_array[i], HEX);
-//     }
-//   Serial.println("END OF READBACK");
-// }
+  Serial.print("max duration: ");
+  Serial.println(calcDuration(MAX_T1_COMPARATOR));
+  Serial.print("t2_prescaler_pointer: ");
+  Serial.println(t2_prescaler_pointer, HEX);
+  Serial.print("t2_comparator: ");
+  Serial.println(t2_comparator, HEX);
+
+  delay(10);
+}
