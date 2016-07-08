@@ -232,24 +232,100 @@ void initializeValueArray(void)
 {
 	TimerCalculator timerCalc;
 
-	value_array[0][0].duration = 40016640;
-	value_array[0][1].duration = 5597760;
-	value_array[0][2].duration = 801720;
 
-	timerCalc.calculate(value_array[0][0].duration);
-	value_array[0][0].t1_comparator = timerCalc.t1_comparator;
-	value_array[0][0].t2_comparator = timerCalc.t2_comparator;
-	value_array[0][0].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
 
-	timerCalc.calculate(value_array[0][1].duration);
-	value_array[0][1].t1_comparator = timerCalc.t1_comparator;
-	value_array[0][1].t2_comparator = timerCalc.t2_comparator;
-	value_array[0][1].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+	value_array[0][0].duration = 500000;
+	value_array[0][1].duration = 70000;
+	value_array[0][2].duration = 10000;
 
-	timerCalc.calculate(value_array[0][2].duration);
-	value_array[0][2].t1_comparator = timerCalc.t1_comparator;
-	value_array[0][2].t2_comparator = timerCalc.t2_comparator;
-	value_array[0][2].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+	value_array[1][0].duration = 100000;
+	value_array[1][1].duration = 200000;
+	value_array[1][2].duration = 50000;
+
+	value_array[2][0].duration = 100000;
+	value_array[2][1].duration = 100000;
+	value_array[2][2].duration = 100000;
+
+	value_array[3][0].duration = 50000;
+	value_array[3][1].duration = 100000;
+	value_array[3][2].duration = 200000;
+
+	value_array[4][0].duration = 100000;
+	value_array[4][1].duration = 200000;
+	value_array[4][2].duration = 50000;
+
+	value_array[5][0].duration = 100000;
+	value_array[5][1].duration = 200000;
+	value_array[5][2].duration = 50000;
+
+	value_array[6][0].duration = 100000;
+	value_array[6][1].duration = 200000;
+	value_array[6][2].duration = 50000;
+
+	value_array[7][0].duration = 100000;
+	value_array[7][1].duration = 200000;
+	value_array[7][2].duration = 50000;
+
+	value_array[8][0].duration = 100000;
+	value_array[8][1].duration = 200000;
+	value_array[8][2].duration = 50000;
+
+	value_array[9][0].duration = 100000;
+	value_array[9][1].duration = 200000;
+	value_array[9][2].duration = 50000;
+
+	value_array[10][0].duration = 100000;
+	value_array[10][1].duration = 200000;
+	value_array[10][2].duration = 50000;
+
+	value_array[11][0].duration = 100000;
+	value_array[11][1].duration = 200000;
+	value_array[11][2].duration = 50000;
+
+	value_array[12][0].duration = 100000;
+	value_array[12][1].duration = 200000;
+	value_array[12][2].duration = 50000;
+
+	value_array[13][0].duration = 100000;
+	value_array[13][1].duration = 200000;
+	value_array[13][2].duration = 50000;
+
+	value_array[14][0].duration = 100000;
+	value_array[14][1].duration = 200000;
+	value_array[14][2].duration = 50000;
+
+	value_array[15][0].duration = 100000;
+	value_array[15][1].duration = 200000;
+	value_array[15][2].duration = 50000;
+
+
+	for (int i = 0; i<16; i++) {
+		for (int j = 0; j<3; j++) {
+
+
+			timerCalc.calculate(value_array[i][j].duration);
+			value_array[i][j].t1_comparator = timerCalc.t1_comparator;
+			value_array[i][j].t2_comparator = timerCalc.t2_comparator;
+			value_array[i][j].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+		}
+	}
+
+
+
+	// timerCalc.calculate(value_array[0][0].duration);
+	// value_array[0][0].t1_comparator = timerCalc.t1_comparator;
+	// value_array[0][0].t2_comparator = timerCalc.t2_comparator;
+	// value_array[0][0].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+	//
+	// timerCalc.calculate(value_array[0][1].duration);
+	// value_array[0][1].t1_comparator = timerCalc.t1_comparator;
+	// value_array[0][1].t2_comparator = timerCalc.t2_comparator;
+	// value_array[0][1].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+	//
+	// timerCalc.calculate(value_array[0][2].duration);
+	// value_array[0][2].t1_comparator = timerCalc.t1_comparator;
+	// value_array[0][2].t2_comparator = timerCalc.t2_comparator;
+	// value_array[0][2].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
 
 	// value_array[0][0].t1_comparator = 0x0265;
 	// value_array[0][0].t2_comparator = 0xFF;

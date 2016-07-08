@@ -4,28 +4,35 @@
 // ALL DURATION VALUES ARE IN CLOCK CYCLES
 
 // #define CLOCK_PERIOD 125 // ns
-#define MAX_T2_COMPARATOR 0xFF
-#define MAX_T1_COMPARATOR 0xFFFF
-#define MAX_T2_PRESCALER_POINTER 6
+
 
 TimerCalculator::TimerCalculator() :
   t2_prescaler_array{1, 8, 32, 64, 128, 256, 1024}
 {
 }
 
-void TimerCalculator::calculate(unsigned long duration)
+void TimerCalculator::calculate(unsigned long durationIn10us)
 {
-  _duration = duration;
+
+  const unsigned long MAX_T2_COMPARATOR = 0xFF;
+  const unsigned long  MAX_T1_COMPARATOR = 0xFFFF;
+  const unsigned long  MAX_T2_PRESCALER_POINTER = 6;
+
+  unsigned long clockCycles = durationIn10us * 80;
+
   t2_prescaler_pointer = 0;
   t2_comparator = 1;
 
   while (true)
   {
+    // debug_data();
+    // Serial.print("max duration: ");
+    // Serial.println(calc_t2_period() * MAX_T1_COMPARATOR);
 
     // if duration can be achieved with T2 parameters then stop
-    if (calcDuration(MAX_T1_COMPARATOR) > duration)
+    if ((calc_t2_period() * MAX_T1_COMPARATOR) > clockCycles)
     {
-      Serial.println("...duration achievable - break");
+      // Serial.println("...duration achievable - break");
       break;
     }
 
@@ -33,7 +40,7 @@ void TimerCalculator::calculate(unsigned long duration)
     {
       if (t2_comparator == MAX_T2_COMPARATOR)
       {
-        Serial.println("...max T2 comparator - break");      
+        // Serial.println("...max T2 comparator - break");
         break;
       }
       else
@@ -51,22 +58,14 @@ void TimerCalculator::calculate(unsigned long duration)
         t2_prescaler_pointer += 1;
       }
     }
-
-    debug_data();
   }
 
-  t1_comparator = (unsigned long)(duration / calc_t2_period());
+  t1_comparator = (unsigned long)(clockCycles / calc_t2_period());
 
-  Serial.println("*****************");
-  Serial.print("t1_comparator: ");
-  Serial.println(t1_comparator, HEX);
-  Serial.println("*****************");
-}
-
-unsigned long TimerCalculator::calcDuration(unsigned long t1_comparator_value)
-{
-  unsigned long t2_period = calc_t2_period() * t2_comparator;
-  return t1_comparator_value * t2_period;
+  // Serial.println("*****************");
+  // Serial.print("t1_comparator: ");
+  // Serial.println(t1_comparator, HEX);
+  // Serial.println("*****************");
 }
 
 unsigned long TimerCalculator::calc_t2_period(void)
@@ -81,12 +80,11 @@ void TimerCalculator::debug_data(void)
   Serial.print("duration: ");
   Serial.println(_duration);
 
-  Serial.print("max duration: ");
-  Serial.println(calcDuration(MAX_T1_COMPARATOR));
+
   Serial.print("t2_prescaler_pointer: ");
   Serial.println(t2_prescaler_pointer, HEX);
   Serial.print("t2_comparator: ");
   Serial.println(t2_comparator, HEX);
 
-  delay(10);
+  delay(50);
 }
