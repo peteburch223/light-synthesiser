@@ -10,6 +10,7 @@
 #include "TimerController.h"
 #include "ArduinoTimer1.h"
 #include "ArduinoTimer2.h"
+#include "TimerCalculator.h"
 
 #define BAUD_RATE 115200
 #define VALUE_ARRAY_SIZE 16
@@ -37,6 +38,7 @@ bool timerComplete;
 
 void serial_echo_line(void);
 void readback_array(void);
+void readbackCalculatedValues(void);
 void initialize_value_array(void);
 void debugSerial(void);
 
@@ -52,6 +54,7 @@ void setup() {
 	timerComplete = false;
 	initialize_value_array();
 	readback_array();
+	readbackCalculatedValues();
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -80,7 +83,7 @@ void loop() {
 	}
 
 	// debugSerial();
-	delay(100);
+	// delay(100);
 }
 
 void debugSerial(void)
@@ -164,15 +167,59 @@ void readback_array(void) {
 	}
 	Serial.println("END OF READBACK");
 	dataReceived = false;
+}
 
+void readbackCalculatedValues(void) {
+	Serial.println("START OF CALCULATED VALUES READBACK");
+	// Serial.print("Channel Selected:");
+	// Serial.print(channel, HEX);
+	// Serial.print('\n');
+
+	for (int i = 0; i<16; i++) {
+		Serial.println("Duration:");
+		Serial.print(value_array[i][0].duration, HEX);
+		Serial.print(",");
+		Serial.print(value_array[i][1].duration, HEX);
+		Serial.print(",");
+		Serial.println(value_array[i][2].duration, HEX);
+
+		Serial.println("t1_comparator:");
+		Serial.print(value_array[i][0].t1_comparator, HEX);
+		Serial.print(",");
+		Serial.print(value_array[i][1].t1_comparator, HEX);
+		Serial.print(",");
+		Serial.println(value_array[i][2].t1_comparator, HEX);
+
+		Serial.println("t2_comparator:");
+		Serial.print(value_array[i][0].t2_comparator, HEX);
+		Serial.print(",");
+		Serial.print(value_array[i][1].t2_comparator, HEX);
+		Serial.print(",");
+		Serial.println(value_array[i][2].t2_comparator, HEX);
+
+		Serial.println("t2_prescaler_pointer:");
+		Serial.print(value_array[i][0].t2_prescaler_pointer, HEX);
+		Serial.print(",");
+		Serial.print(value_array[i][1].t2_prescaler_pointer, HEX);
+		Serial.print(",");
+		Serial.println(value_array[i][2].t2_prescaler_pointer, HEX);
+	}
+	Serial.println("END OF CALCULATED VALUES READBACK");
+	dataReceived = false;
 }
 
 void initialize_value_array(void) {
+	TimerCalculator timerCalc;
 	for (int i = 0; i<16; i++) {
 		for (int j = 0; j<3; j++) {
 			int channel = i;
 			int colour = j << 4;
-			value_array[i][j].duration = 0xFFFFFF00 | colour | channel;
+			value_array[i][j].duration = 0xFFF00 | colour | channel;
+
+			timerCalc.calculate(value_array[i][j].duration);
+			value_array[i][j].t1_comparator = timerCalc.t1_comparator;
+			value_array[i][j].t2_comparator = timerCalc.t2_comparator;
+			value_array[i][j].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
 		}
 	}
 }

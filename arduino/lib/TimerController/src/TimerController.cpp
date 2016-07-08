@@ -7,6 +7,7 @@
 #define WAIT_T2_PRESCALER_POINTER 0x01
 #define WAIT_T2_COMPARATOR 0xFE
 
+// values for testing only
 #define COLOUR_T1_COMPARATOR 0xFF
 #define COLOUR_T2_PRESCALER_POINTER 0x04
 #define COLOUR_T2_COMPARATOR 0xFF
@@ -39,6 +40,14 @@ void TimerController::checkForStart(unsigned char channel)
         colour = _stateMachine->getColour() + 2;
         Serial.print("TimerController - Starting Timer - State: DISPLAY_COLOUR: ");
         Serial.println(colour);
+
+
+				Serial.print(_durations[channel][0].duration, HEX);
+				Serial.print(_durations[channel][1].duration, HEX);
+				Serial.println(_durations[channel][2].duration, HEX);
+
+
+
         // duration = _durations[channel][_stateMachine->getColour()];
         duration.t2_prescaler_pointer = (unsigned long) COLOUR_T2_PRESCALER_POINTER;
         duration.t2_comparator = (unsigned long) COLOUR_T2_COMPARATOR;
