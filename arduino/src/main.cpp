@@ -39,8 +39,9 @@ bool timerComplete;
 void serial_echo_line(void);
 void readback_array(void);
 void readbackCalculatedValues(void);
-void initialize_value_array(void);
+// void initialize_value_array(void);
 void debugSerial(void);
+void initializeValueArray(void);
 
 
 
@@ -52,9 +53,9 @@ void setup() {
 	// setup_io();
 	dataReceived = false;
 	timerComplete = false;
-	initialize_value_array();
-	readback_array();
-	readbackCalculatedValues();
+	initializeValueArray();
+	// readback_array();
+	// readbackCalculatedValues();
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -176,6 +177,8 @@ void readbackCalculatedValues(void) {
 	// Serial.print('\n');
 
 	for (int i = 0; i<16; i++) {
+		Serial.print("CHANNEL: ");
+		Serial.println(i, HEX);
 		Serial.println("Duration:");
 		Serial.print(value_array[i][0].duration, HEX);
 		Serial.print(",");
@@ -208,20 +211,36 @@ void readbackCalculatedValues(void) {
 	dataReceived = false;
 }
 
-void initialize_value_array(void) {
-	TimerCalculator timerCalc;
-	for (int i = 0; i<16; i++) {
-		for (int j = 0; j<3; j++) {
-			int channel = i;
-			int colour = j << 4;
-			value_array[i][j].duration = 0xFFF00 | colour | channel;
+// void initialize_value_array(void) {
+// 	TimerCalculator timerCalc;
+// 	for (int i = 0; i<16; i++) {
+// 		for (int j = 0; j<3; j++) {
+// 			int channel = i;
+// 			int colour = j << 4;
+// 			value_array[i][j].duration = 0xFFF00 | colour | channel;
+//
+// 			timerCalc.calculate(value_array[i][j].duration);
+// 			value_array[i][j].t1_comparator = timerCalc.t1_comparator;
+// 			value_array[i][j].t2_comparator = timerCalc.t2_comparator;
+// 			value_array[i][j].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
+// 		}
+// 	}
+// }
 
-			timerCalc.calculate(value_array[i][j].duration);
-			value_array[i][j].t1_comparator = timerCalc.t1_comparator;
-			value_array[i][j].t2_comparator = timerCalc.t2_comparator;
-			value_array[i][j].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
-		}
-	}
+void initializeValueArray(void)
+{
+
+	value_array[0][0].t1_comparator = 0xFF;
+	value_array[0][0].t2_comparator = 0x022C;
+	value_array[0][0].t2_prescaler_pointer = 0x05;
+
+	value_array[0][1].t1_comparator = 0xFF;
+	value_array[0][1].t2_comparator = 0xFF;
+	value_array[0][1].t2_prescaler_pointer = 0x04;
+
+	value_array[0][2].t1_comparator = 0xFF;
+	value_array[0][2].t2_comparator = 0xFF;
+	value_array[0][2].t2_prescaler_pointer = 0x02;
 }
 
 // void setup_io(void) {

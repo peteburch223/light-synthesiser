@@ -49,7 +49,8 @@ void SequenceState::advance(void)
 			Serial.println("...DISPLAY_COLOUR timer complete");
 			if (colour == BLUE)
 			{
-				Serial.println("...colours completed");
+				Serial.println(" **** colours completed ****");
+				getNextColour();
 				state = AWAIT_COMMAND;
 			}
 			else
