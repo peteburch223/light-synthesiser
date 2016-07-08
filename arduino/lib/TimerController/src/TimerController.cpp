@@ -3,9 +3,9 @@
 #include "States.h"
 
 // configure these values for a delay of 10ms
-#define WAIT_T1_COMPARATOR 0xFE
-#define WAIT_T2_PRESCALER_POINTER 0x01
-#define WAIT_T2_COMPARATOR 0x54
+#define WAIT_T1_COMPARATOR 0x0004
+#define WAIT_T2_PRESCALER_POINTER 0x02
+#define WAIT_T2_COMPARATOR 0xF0
 
 // values for testing only
 #define COLOUR_T1_COMPARATOR 0xFF

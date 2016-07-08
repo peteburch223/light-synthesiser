@@ -65,6 +65,8 @@ ISR(TIMER1_COMPA_vect)
   TCCR1B = 0x00;
 	TCCR2A = 0x00;
 	TCCR2B = 0x00;
+	TCNT2 = 0x00;
+	TCNT1 = 0x00;
 	stateMachine.setTimerComplete();
   Serial.println("T1 interrupt");
 }
@@ -230,15 +232,15 @@ void readbackCalculatedValues(void) {
 void initializeValueArray(void)
 {
 
-	value_array[0][0].t1_comparator = 0xFF;
-	value_array[0][0].t2_comparator = 0x022C;
-	value_array[0][0].t2_prescaler_pointer = 0x05;
+	value_array[0][0].t1_comparator = 0x0265;
+	value_array[0][0].t2_comparator = 0xFF;
+	value_array[0][0].t2_prescaler_pointer = 0x06;
 
-	value_array[0][1].t1_comparator = 0xFF;
+	value_array[0][1].t1_comparator = 0x0157;
 	value_array[0][1].t2_comparator = 0xFF;
 	value_array[0][1].t2_prescaler_pointer = 0x04;
 
-	value_array[0][2].t1_comparator = 0xFF;
+	value_array[0][2].t1_comparator = 0x0189;
 	value_array[0][2].t2_comparator = 0xFF;
 	value_array[0][2].t2_prescaler_pointer = 0x02;
 }
