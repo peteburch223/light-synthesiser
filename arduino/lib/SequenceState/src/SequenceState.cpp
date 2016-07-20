@@ -24,9 +24,22 @@ void SequenceState::advance(void)
 		{
 			Serial.println("...triggered");
 			startTimer = true;
-			state = WAIT;
+			state = TEST;
 		}
 		break;
+
+
+		case TEST:
+			// Serial.println("State: WAIT");
+			if (isTimerComplete())
+			{
+				clearTimerComplete();
+				Serial.println("...TEST timer complete");
+				state = AWAIT_COMMAND;
+			}
+			break;
+
+
 
 	case WAIT:
 		// Serial.println("State: WAIT");

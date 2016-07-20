@@ -32,7 +32,6 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
     // if duration can be achieved with T2 parameters then stop
     if ((calc_t2_period() * MAX_T1_COMPARATOR) > clockCycles)
     {
-      // Serial.println("...duration achievable - break");
       break;
     }
 

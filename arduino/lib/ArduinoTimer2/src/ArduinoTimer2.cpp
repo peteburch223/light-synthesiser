@@ -25,12 +25,12 @@ void ArduinoTimer2::start(unsigned char colour)
 {
   setMode (2, prescaler, Timer2::TOGGLE_A_ON_COMPARE);
   PORTD |= (1 << colour);
-  Serial.print("......OCR2A: ");
-  Serial.println(OCR2A, HEX);
-  Serial.print("......TCCR2A: ");
-  Serial.println(TCCR2A, HEX);
-  Serial.print("......TCCR2B: ");
-  Serial.println(TCCR2B, HEX);
+  if (DEBUG) Serial.print("......OCR2A: ");
+  if (DEBUG) Serial.println(OCR2A, HEX);
+  if (DEBUG) Serial.print("......TCCR2A: ");
+  if (DEBUG) Serial.println(TCCR2A, HEX);
+  if (DEBUG) Serial.print("......TCCR2B: ");
+  if (DEBUG) Serial.println(TCCR2B, HEX);
 }
 
 void ArduinoTimer2::setMode (const byte mode, const byte clock, const byte port)

@@ -11,6 +11,7 @@
 #include "ArduinoTimer1.h"
 #include "ArduinoTimer2.h"
 #include "TimerCalculator.h"
+#include "States.h"
 
 #define BAUD_RATE 115200
 #define VALUE_ARRAY_SIZE 16
@@ -67,7 +68,7 @@ ISR(TIMER1_COMPA_vect)
 	TCNT2 = 0x00;
 	TCNT1 = 0x00;
 	stateMachine.setTimerComplete();
-  Serial.println("T1 interrupt");
+  if (DEBUG) Serial.println("T1 interrupt");
 }
 
 

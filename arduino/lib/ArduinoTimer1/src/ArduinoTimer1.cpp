@@ -1,5 +1,6 @@
 #include "ArduinoTimer1.h"
 #include "arduino.h"
+#include "States.h"
 
 #define T1 5
 
@@ -21,8 +22,8 @@ void ArduinoTimer1::setup(void)
 
 
 
-  Serial.print("......comparator: ");
-  Serial.println(comparator, HEX);
+  if (DEBUG) Serial.print("......comparator: ");
+  if (DEBUG) Serial.println(comparator, HEX);
 
   OCR1A = comparator;
 
@@ -31,8 +32,8 @@ void ArduinoTimer1::setup(void)
 
   unsigned int tempOCR1A;
   tempOCR1A = OCR1A;
-  Serial.print("......OCR1A: ");
-  Serial.println(tempOCR1A, HEX);
+  if (DEBUG) Serial.print("......OCR1A: ");
+  if (DEBUG) Serial.println(tempOCR1A, HEX);
 
 }
 
@@ -43,14 +44,14 @@ void ArduinoTimer1::start(void)
   TIFR1 |= bit (OCF1A);    // clear interrupt flag
   TIMSK1 = bit (OCIE1A);   // interrupt on Compare A Match
 
-  Serial.print("......TCCR1A: ");
-  Serial.println(TCCR1A, HEX);
-  Serial.print("......TCCR1B: ");
-  Serial.println(TCCR1B, HEX);
-  Serial.print("......TIFR1: ");
-  Serial.println(TIFR1, HEX);
-  Serial.print("......TIMSK1: ");
-  Serial.println(TIMSK1, HEX);
+  if (DEBUG) Serial.print("......TCCR1A: ");
+  if (DEBUG) Serial.println(TCCR1A, HEX);
+  if (DEBUG) Serial.print("......TCCR1B: ");
+  if (DEBUG) Serial.println(TCCR1B, HEX);
+  if (DEBUG) Serial.print("......TIFR1: ");
+  if (DEBUG) Serial.println(TIFR1, HEX);
+  if (DEBUG) Serial.print("......TIMSK1: ");
+  if (DEBUG) Serial.println(TIMSK1, HEX);
 }
 
 void ArduinoTimer1::setMode (const byte mode, const byte clock, const byte port)

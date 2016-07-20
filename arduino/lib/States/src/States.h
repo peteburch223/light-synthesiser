@@ -1,6 +1,8 @@
 #ifndef _States_h
   #define _States_h
 
-  enum { AWAIT_COMMAND, WAIT, DISPLAY_COLOUR };
+  enum { AWAIT_COMMAND, WAIT, DISPLAY_COLOUR, TEST };
   enum { RED, GREEN, BLUE, NO_COLOUR};
+
+  #define DEBUG false
 #endif
