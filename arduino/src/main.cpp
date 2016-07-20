@@ -13,7 +13,6 @@
 #include "TimerCalculator.h"
 #include "States.h"
 
-#define BAUD_RATE 115200
 #define VALUE_ARRAY_SIZE 16
 #define SELECTOR_PIN_MASK 0x0F
 #define SELECTOR_DEFAULT 0x00
@@ -60,13 +59,14 @@ void setup() {
 
 ISR(TIMER1_COMPA_vect)
 {
-	PORTD &= 0xE3;		//Clear colour output pins
-  TCCR1A = 0x00;
-  TCCR1B = 0x00;
-	TCCR2A = 0x00;
-	TCCR2B = 0x00;
+	PORTD &= 0xE3;		// Clear colour output pins
+	TIMSK1 = 0x00; 		// Disable any further interrupts
+	TCNT1 = 0x0000;
 	TCNT2 = 0x00;
-	TCNT1 = 0x00;
+  TCCR1A = 0x00;		// Disable Timer 1
+	TCCR1B = 0x00;		// Disable Timer 1
+	TCCR2A = 0x00;		// Disable Timer 2
+	TCCR2B = 0x00;		// Disable Timer 2
 	stateMachine.setTimerComplete();
   if (DEBUG) Serial.println("T1 interrupt");
 }
@@ -235,17 +235,17 @@ void initializeValueArray(void)
 
 
 
-	value_array[0][0].duration = 500000;
-	value_array[0][1].duration = 70000;
-	value_array[0][2].duration = 10000;
+	value_array[0][0].duration = 4200;
+	value_array[0][1].duration = 5800;
+	value_array[0][2].duration = 6600;
 
-	value_array[1][0].duration = 100000;
-	value_array[1][1].duration = 200000;
-	value_array[1][2].duration = 50000;
+	value_array[1][0].duration = 7400;
+	value_array[1][1].duration = 13200;
+	value_array[1][2].duration = 19800;
 
-	value_array[2][0].duration = 100000;
-	value_array[2][1].duration = 100000;
-	value_array[2][2].duration = 100000;
+	value_array[2][0].duration = 69800;
+	value_array[2][1].duration = 120000;
+	value_array[2][2].duration = 170000;
 
 	value_array[3][0].duration = 50000;
 	value_array[3][1].duration = 100000;

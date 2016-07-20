@@ -14,5 +14,6 @@
       unsigned long prescaler;
     private:
       void setMode (const byte mode, const byte clock, const byte port);
+      void debugSerial(void);
   };
 #endif

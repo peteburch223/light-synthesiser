@@ -2,8 +2,14 @@
 #include "arduino.h"
 #include "SequenceState.h"
 
+#define LED_GATE 7
+
+
 SequenceState::SequenceState()
 {
+
+	digitalWrite(LED_GATE, LOW);
+	pinMode(LED_GATE, OUTPUT);
 	buttonState = LOW;
 	previousButtonState = LOW;
 	state = AWAIT_COMMAND;
@@ -23,8 +29,10 @@ void SequenceState::advance(void)
 		if (buttonState != previousButtonState && buttonState == HIGH)
 		{
 			Serial.println("...triggered");
+			// if (not DEBUG) Serial.end();
 			startTimer = true;
-			state = TEST;
+			state = WAIT;
+			digitalWrite(LED_GATE, HIGH);
 		}
 		break;
 
@@ -62,9 +70,13 @@ void SequenceState::advance(void)
 			Serial.println("...DISPLAY_COLOUR timer complete");
 			if (colour == BLUE)
 			{
+				if (not DEBUG) Serial.begin(BAUD_RATE);
+
 				Serial.println(" **** colours completed ****");
 				getNextColour();
 				state = AWAIT_COMMAND;
+				digitalWrite(LED_GATE, LOW);
+
 			}
 			else
 			{

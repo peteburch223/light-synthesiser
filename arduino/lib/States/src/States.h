@@ -5,4 +5,5 @@
   enum { RED, GREEN, BLUE, NO_COLOUR};
 
   #define DEBUG false
+  #define BAUD_RATE 115200
 #endif

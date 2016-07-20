@@ -7,7 +7,7 @@
 
 
 TimerCalculator::TimerCalculator() :
-  t2_prescaler_array{1, 8, 32, 64, 128, 256, 1024}
+  t2_prescaler_array{0, 1, 8, 32, 64, 128, 256, 1024}
 {
 }
 
@@ -16,11 +16,11 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
 
   const unsigned long MAX_T2_COMPARATOR = 0xFF;
   const unsigned long  MAX_T1_COMPARATOR = 0xFFFF;
-  const unsigned long  MAX_T2_PRESCALER_POINTER = 6;
+  const unsigned long  MAX_T2_PRESCALER_POINTER = 7;
 
   unsigned long clockCycles = durationIn10us * 80;
 
-  t2_prescaler_pointer = 0;
+  t2_prescaler_pointer = 1;
   t2_comparator = 1;
 
   while (true)
@@ -59,7 +59,7 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
     }
   }
 
-  t1_comparator = (unsigned long)(clockCycles / calc_t2_period());
+  t1_comparator = (unsigned long)(clockCycles / calc_t2_period()) - 1;
 
   // Serial.println("*****************");
   // Serial.print("t1_comparator: ");
@@ -70,7 +70,7 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
 unsigned long TimerCalculator::calc_t2_period(void)
 {
   unsigned long prescaler = t2_prescaler_array[t2_prescaler_pointer];
-  return prescaler * t2_comparator;
+  return prescaler * (t2_comparator + 1);
 }
 
 void TimerCalculator::debug_data(void)

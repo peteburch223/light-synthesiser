@@ -3,7 +3,7 @@
 #include "States.h"
 
 // configure these values for a delay of 10ms
-#define WAIT_T1_COMPARATOR 0x0007
+#define WAIT_T1_COMPARATOR 0x9C3F
 #define WAIT_T2_COMPARATOR 0x01
 #define WAIT_T2_PRESCALER_POINTER 0x01
 
@@ -69,12 +69,11 @@ void TimerController::checkForStart(unsigned char channel)
 
 void TimerController::setupTimers(Duration duration)
 {
-  // Serial.println("TimerController - set up and start timers");
   _timer1->comparator = duration.t1_comparator;
   _timer2->prescaler = duration.t2_prescaler_pointer;
   _timer2->comparator = duration.t2_comparator;
-  _timer1->setup();
   _timer2->setup();
+  _timer1->setup();
   _timer1->start();
   _timer2->start(colour);
 }
