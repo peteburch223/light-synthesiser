@@ -32,29 +32,19 @@ SequenceState stateMachine;
 ArduinoTimer1 timer1;
 ArduinoTimer2 timer2;
 TimerController timer(&timer1, &timer2, &stateMachine, value_array);
-bool timerComplete;
 
 // Function declarations - these will be moved to objects
 
 void serial_echo_line(void);
-void readback_array(void);
 void readbackCalculatedValues(void);
-// void initialize_value_array(void);
 void debugSerial(void);
 void initializeValueArray(void);
-
-
-
-
 
 // the setup function runs once when you press reset or power the board
 void setup() {
 	Serial.begin(BAUD_RATE);
 	dataReceived = false;
-	timerComplete = false;
 	initializeValueArray();
-	// readback_array();
-	// readbackCalculatedValues();
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -80,39 +70,11 @@ void loop() {
 	stateMachine.buttonState = trigger.valueShiftedToRoot();
 	stateMachine.advance();
 
-	serial_echo_line();
-	if (dataReceived) {
-		readback_array();
-	}
-
-	// debugSerial();
-	// delay(100);
+	// serial_echo_line();
+	// if (dataReceived) {
+	// 	readback_array();
+	// }
 }
-
-void debugSerial(void)
-{
-
-
-
-	unsigned char temp;
-
-	// Serial.print("PINC: ");
-	// Serial.println(PINC, HEX);
-	//
-	// Serial.print("DDRC: ");
-	// Serial.println(DDRC, HEX);
-	//
-	// Serial.print("PORTC: ");
-	// Serial.println(PORTC, HEX);
-	temp = selector.valueShiftedToRoot();
-	Serial.print("Selector: ");
-	Serial.println(temp, HEX);
-
-	temp = trigger.valueShiftedToRoot();
-	Serial.print("Trigger: ");
-	Serial.println(temp, HEX);
-}
-
 
 void serial_echo_line(void) {
 	static int arrayPointer;
@@ -156,27 +118,8 @@ void serial_echo_line(void) {
 	}
 }
 
-void readback_array(void) {
-	Serial.println("START OF READBACK");
-	// Serial.print("Channel Selected:");
-	// Serial.print(channel, HEX);
-	// Serial.print('\n');
-
-	for (int i = 0; i<16; i++) {
-		Serial.print(value_array[i][0].duration, HEX);
-		Serial.print(value_array[i][1].duration, HEX);
-		Serial.print(value_array[i][2].duration, HEX);
-		Serial.print('\n');
-	}
-	Serial.println("END OF READBACK");
-	dataReceived = false;
-}
-
 void readbackCalculatedValues(void) {
 	Serial.println("START OF CALCULATED VALUES READBACK");
-	// Serial.print("Channel Selected:");
-	// Serial.print(channel, HEX);
-	// Serial.print('\n');
 
 	for (int i = 0; i<16; i++) {
 		Serial.print("CHANNEL: ");
@@ -213,27 +156,9 @@ void readbackCalculatedValues(void) {
 	dataReceived = false;
 }
 
-// void initialize_value_array(void) {
-// 	TimerCalculator timerCalc;
-// 	for (int i = 0; i<16; i++) {
-// 		for (int j = 0; j<3; j++) {
-// 			int channel = i;
-// 			int colour = j << 4;
-// 			value_array[i][j].duration = 0xFFF00 | colour | channel;
-//
-// 			timerCalc.calculate(value_array[i][j].duration);
-// 			value_array[i][j].t1_comparator = timerCalc.t1_comparator;
-// 			value_array[i][j].t2_comparator = timerCalc.t2_comparator;
-// 			value_array[i][j].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
-// 		}
-// 	}
-// }
-
 void initializeValueArray(void)
 {
 	TimerCalculator timerCalc;
-
-
 
 	value_array[0][0].duration = 4200;
 	value_array[0][1].duration = 5800;
@@ -299,44 +224,12 @@ void initializeValueArray(void)
 	value_array[15][1].duration = 200000;
 	value_array[15][2].duration = 50000;
 
-
 	for (int i = 0; i<16; i++) {
 		for (int j = 0; j<3; j++) {
-
-
 			timerCalc.calculate(value_array[i][j].duration);
 			value_array[i][j].t1_comparator = timerCalc.t1_comparator;
 			value_array[i][j].t2_comparator = timerCalc.t2_comparator;
 			value_array[i][j].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
 		}
 	}
-
-
-
-	// timerCalc.calculate(value_array[0][0].duration);
-	// value_array[0][0].t1_comparator = timerCalc.t1_comparator;
-	// value_array[0][0].t2_comparator = timerCalc.t2_comparator;
-	// value_array[0][0].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
-	//
-	// timerCalc.calculate(value_array[0][1].duration);
-	// value_array[0][1].t1_comparator = timerCalc.t1_comparator;
-	// value_array[0][1].t2_comparator = timerCalc.t2_comparator;
-	// value_array[0][1].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
-	//
-	// timerCalc.calculate(value_array[0][2].duration);
-	// value_array[0][2].t1_comparator = timerCalc.t1_comparator;
-	// value_array[0][2].t2_comparator = timerCalc.t2_comparator;
-	// value_array[0][2].t2_prescaler_pointer = timerCalc.t2_prescaler_pointer;
-
-	// value_array[0][0].t1_comparator = 0x0265;
-	// value_array[0][0].t2_comparator = 0xFF;
-	// value_array[0][0].t2_prescaler_pointer = 0x06;
-	//
-	// value_array[0][1].t1_comparator = 0x0157;
-	// value_array[0][1].t2_comparator = 0xFF;
-	// value_array[0][1].t2_prescaler_pointer = 0x04;
-	//
-	// value_array[0][2].t1_comparator = 0x0189;
-	// value_array[0][2].t2_comparator = 0xFF;
-	// value_array[0][2].t2_prescaler_pointer = 0x02;
 }

@@ -1,11 +1,6 @@
 #include "TimerCalculator.h"
 #include "arduino.h"
 
-// ALL DURATION VALUES ARE IN CLOCK CYCLES
-
-// #define CLOCK_PERIOD 125 // ns
-
-
 TimerCalculator::TimerCalculator() :
   t2_prescaler_array{0, 1, 8, 32, 64, 128, 256, 1024}
 {
@@ -26,10 +21,6 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
   while (true)
   {
     // debug_data();
-    // Serial.print("max duration: ");
-    // Serial.println(calc_t2_period() * MAX_T1_COMPARATOR);
-
-    // if duration can be achieved with T2 parameters then stop
     if ((calc_t2_period() * MAX_T1_COMPARATOR) > clockCycles)
     {
       break;
@@ -39,7 +30,6 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
     {
       if (t2_comparator == MAX_T2_COMPARATOR)
       {
-        // Serial.println("...max T2 comparator - break");
         break;
       }
       else
@@ -60,11 +50,6 @@ void TimerCalculator::calculate(unsigned long durationIn10us)
   }
 
   t1_comparator = (unsigned long)(clockCycles / calc_t2_period()) - 1;
-
-  // Serial.println("*****************");
-  // Serial.print("t1_comparator: ");
-  // Serial.println(t1_comparator, HEX);
-  // Serial.println("*****************");
 }
 
 unsigned long TimerCalculator::calc_t2_period(void)
@@ -73,14 +58,13 @@ unsigned long TimerCalculator::calc_t2_period(void)
   return prescaler * (t2_comparator + 1);
 }
 
-void TimerCalculator::debug_data(void)
+void TimerCalculator::debugSerial(void)
 {
   Serial.println("*****************");
   Serial.print("duration: ");
   Serial.println(_duration);
-
-
-  Serial.print("t2_prescaler_pointer: ");
+  Serial.print("t1_comparator: ");
+  Serial.println(t1_comparator, HEX);  Serial.print("t2_prescaler_pointer: ");
   Serial.println(t2_prescaler_pointer, HEX);
   Serial.print("t2_comparator: ");
   Serial.println(t2_comparator, HEX);

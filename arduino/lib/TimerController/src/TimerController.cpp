@@ -21,7 +21,6 @@ void TimerController::checkForStart(unsigned char channel)
     _stateMachine->clearStartTimer();
     switch (_stateMachine->getState())
     {
-
       case TEST:
         colour = 0;
         if (DEBUG) Serial.println("TimerController - Starting Timer - State: TEST");
@@ -31,7 +30,6 @@ void TimerController::checkForStart(unsigned char channel)
         duration.t1_comparator = (unsigned long) WAIT_T1_COMPARATOR;
         setupTimers(duration);
       break;
-
 
       case WAIT:
         colour = 0;
@@ -45,18 +43,13 @@ void TimerController::checkForStart(unsigned char channel)
 
       case DISPLAY_COLOUR:
         colour = _stateMachine->getColour() + 2;
-        if (DEBUG) Serial.print("TimerController:  Starting Timer: DISPLAY_COLOUR : Channel ");
-        if (DEBUG) Serial.println(channel, HEX);
-
-
-    	  if (DEBUG) Serial.print("Colour: ");
-        if (DEBUG) Serial.println(_stateMachine->getColour(), HEX);
-    		if (DEBUG) Serial.print(_durations[channel][_stateMachine->getColour()].t1_comparator, HEX);
-    		if (DEBUG) Serial.print(",");
-    		if (DEBUG) Serial.print(_durations[channel][_stateMachine->getColour()].t2_comparator, HEX);
-    		if (DEBUG) Serial.print(",");
-    		if (DEBUG) Serial.println(_durations[channel][_stateMachine->getColour()].t2_prescaler_pointer, HEX);
-
+        if (DEBUG)
+        {
+          Serial.print("TimerController:  Starting Timer: DISPLAY_COLOUR : Channel ");
+          Serial.println(channel, HEX);
+          Serial.print("Colour: ");
+          Serial.println(_stateMachine->getColour(), HEX);
+        }
         duration = _durations[channel][_stateMachine->getColour()];
         setupTimers(duration);
       break;
