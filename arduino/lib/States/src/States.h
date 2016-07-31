@@ -6,4 +6,5 @@
 
   #define DEBUG false
   #define BAUD_RATE 115200
+  #define VALUE_ARRAY_SIZE 32
 #endif

@@ -12,7 +12,7 @@
   class TimerController
   {
   public:
-    TimerController(ArduinoTimer1 *timer1, ArduinoTimer2 *timer2, SequenceState *stateMachine, Duration (&arr)[16][3]);
+    TimerController(ArduinoTimer1 *timer1, ArduinoTimer2 *timer2, SequenceState *stateMachine, Duration (&arr)[VALUE_ARRAY_SIZE][3]);
     void checkForStart(unsigned char channel);
 
   private:
@@ -21,7 +21,7 @@
     ArduinoTimer1 * _timer1;
     ArduinoTimer2 * _timer2;
     SequenceState * _stateMachine;
-    Duration (&_durations)[16][3];
+    Duration (&_durations)[VALUE_ARRAY_SIZE][3];
   };
 
 #endif

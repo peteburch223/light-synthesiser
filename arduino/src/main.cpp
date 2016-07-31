@@ -13,8 +13,7 @@
 #include "TimerCalculator.h"
 #include "States.h"
 
-#define VALUE_ARRAY_SIZE 16
-#define SELECTOR_PIN_MASK 0x0F
+#define SELECTOR_PIN_MASK 0x1F
 #define SELECTOR_DEFAULT 0x00
 #define TRIGGER_PIN_MASK 0x20
 #define TRIGGER_DEFAULT 0x00

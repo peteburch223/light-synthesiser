@@ -7,7 +7,7 @@
 #define WAIT_T2_COMPARATOR 0x01
 #define WAIT_T2_PRESCALER_POINTER 0x01
 
-TimerController::TimerController(ArduinoTimer1 *timer1, ArduinoTimer2 *timer2, SequenceState *stateMachine, Duration (&arr)[16][3])
+TimerController::TimerController(ArduinoTimer1 *timer1, ArduinoTimer2 *timer2, SequenceState *stateMachine, Duration (&arr)[VALUE_ARRAY_SIZE][3])
   : _timer1(timer1), _timer2(timer2), _stateMachine(stateMachine), _durations(arr)
 {
 }
